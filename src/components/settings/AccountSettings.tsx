@@ -19,7 +19,7 @@ export default function AccountSettings() {
   const profileData = useSelector(selectProfile);
   console.log("Prf", profileData)
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(profilePlaceholder);
+  const [, setProfileImage] = useState(profilePlaceholder);
   const [formData, setFormData] = useState({
     first_name: profileData?.first_name,
     last_name: profileData?.last_name,
@@ -29,7 +29,7 @@ export default function AccountSettings() {
     address: profileData?.address || "--",
     image: getImageUrl(profileData?.image),
   });
-  const [fileUrl, setFileUrl] = useState();
+  const [, setFileUrl] = useState();
   const fileInputRef = useRef<any>(null);
 
   // Fetch profile data

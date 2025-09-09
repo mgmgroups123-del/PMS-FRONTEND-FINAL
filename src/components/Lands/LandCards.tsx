@@ -11,7 +11,7 @@ import editImg from '../../assets/properties/edit.png';
 import trashImg from '../../assets/properties/trash.png';
 import eyeImg from '../../assets/properties/eye.png';
 import type { LandsDetails } from '../../features/lands/type';
-import property1 from '../../assets/properties/property1.png'
+// import property1 from '../../assets/properties/property1.png'
 import { GetLocalStorage } from '../../utils/localstorage';
 
 type ModalMode = 'add' | 'view' | 'edit';

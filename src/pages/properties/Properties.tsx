@@ -43,7 +43,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { createUnit } from "../../features/Properties/Services";
 import { GetLocalStorage } from "../../utils/localstorage";
-import { handleUploadImage } from "../../utils/uploadImage";
+// import { handleUploadImage } from "../../utils/uploadImage";
 import axios from "axios";
 import { getImageUrl } from "../../utils/getImage";
 type ModalMode = "add" | "view" | "edit";

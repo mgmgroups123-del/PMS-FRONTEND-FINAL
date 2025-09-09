@@ -617,7 +617,7 @@ export default function EditTenantForm({
 
 												// Only allow 1-31
 												if (value >= 1 && value <= 31) {
-													handleInputChange('rentDueDate', value);
+													handleInputChange('rentDueDate', value.toString());
 												} else if (e.target.value === '') {
 													// Allow clearing input
 													handleInputChange('rentDueDate', '');

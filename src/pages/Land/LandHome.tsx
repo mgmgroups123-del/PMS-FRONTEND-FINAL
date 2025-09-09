@@ -12,7 +12,7 @@ import { Input } from '../../components/ui/input'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import searchImg from '../../assets/properties/search.png'
 import { GetLocalStorage } from '../../utils/localstorage'
-import axios from 'axios'
+// import axios from 'axios'
 
 type ModalMode = 'add' | 'view' | 'edit';
 
@@ -24,7 +24,7 @@ const LandHome = () => {
   const [deleteUUID, setDeleteUUID] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [fileUrl, setFileUrl] = useState();
+  const [,] = useState();
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,33 +90,6 @@ const LandHome = () => {
 
   const role = GetLocalStorage('role')
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file: File | undefined = event.target.files?.[0];
-      if (!file) return;
-  
-      // // Preview locally
-      // const reader = new FileReader();
-      // reader.onload = (e) => setUploadedImage(e.target?.result as string);
-      // reader.readAsDataURL(file);
-  
-      // Upload to S3
-      const formData = new FormData();
-      formData.append("file", file);
-  
-      try {
-        const res: any = await axios.post(`${import.meta.env.VITE_PUBLIC_API_URL}/api/upload`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        if (res.data.status === 'success') {
-          toast.success("Uploaded to S3");
-          setFileUrl(res.data.data)
-        }
-        console.log("S3 URL 2:", res.data.data);
-      } catch (err) {
-        console.error("Upload failed:", err);
-        toast.error("Upload failed");
-      };
-    };
 
   return (
     <div className='p-3'>

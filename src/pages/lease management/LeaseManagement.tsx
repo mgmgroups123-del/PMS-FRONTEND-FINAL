@@ -210,12 +210,6 @@ function LeaseManagement() {
   };
 
   const activeLeasesCount = transformedLeaseData.filter(lease => lease.status === 'Active').length
-  const totalDeposits = transformedLeaseData.reduce((total, lease) => {
-    if (lease.deposit === "N/A") return total
-    const deposit = lease.deposit.replace(/[₹,]/g, '')
-    const depositNum = parseInt(deposit)
-    return total + (isNaN(depositNum) ? 0 : depositNum)
-  }, 0)
 
   const cardData = [
     {

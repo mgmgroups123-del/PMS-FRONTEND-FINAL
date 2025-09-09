@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { FaRegBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Profileicon from "../../assets/profileicon.png";
+// import Profileicon from "../../assets/profileicon.png";
 import pmsicon from "../../assets/MGM_Logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { selectNotification, selectUnreadCount } from "../../features/notification/redecures/selectors";
