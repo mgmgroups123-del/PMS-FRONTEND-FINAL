@@ -13,6 +13,7 @@ import eyeImg from '../../assets/properties/eye.png';
 import type { LandsDetails } from '../../features/lands/type';
 // import property1 from '../../assets/properties/property1.png'
 import { GetLocalStorage } from '../../utils/localstorage';
+import { getImageUrl } from '../../utils/getImage';
 
 type ModalMode = 'add' | 'view' | 'edit';
 
@@ -96,7 +97,7 @@ const LandCards: React.FC<Props> = ({
                 <div className='relative'>
                     <div className="h-58 w-full">
                         <img
-                            src={`http://localhost:3002/${property?.image}`}
+                            src={getImageUrl(property?.image)}
                             alt={property.land_name || "Land Image"}
                             className="w-full h-56 rounded-xl object-cover"
                         />

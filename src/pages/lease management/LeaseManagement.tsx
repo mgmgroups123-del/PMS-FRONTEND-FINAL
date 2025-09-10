@@ -6,11 +6,11 @@ import { Card, CardContent } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import cardimg1 from "../../assets/image 315.png"
-import cardimg2 from "../../assets/image 315.png"
-import cardimg3 from "../../assets/image 315.png"
-import cardimg4 from "../../assets/image 315.png"
-import man from "../../assets/Ellipse 276.png"
+// import cardimg1 from "../../assets/image 315.png"
+// import cardimg2 from "../../assets/image 315.png"
+// import cardimg3 from "../../assets/image 315.png"
+// import cardimg4 from "../../assets/image 315.png"
+// import man from "../../assets/Ellipse 276.png"
 import { Leaseviewform } from "../../components/LeaseManagement/Leaseviewform"
 import { useDispatch, useSelector } from "react-redux"
 import { selectLeasemanagement } from "../../features/Leasemanagement/reducer/selector"
@@ -145,7 +145,7 @@ function LeaseManagement() {
       id: lease._id || lease.uuid,
       name: personalInfo?.full_name || "No Name",
       unit: `${unit?.unit_name || unit?.land_name || "N/A"}`,
-      avatar: man,
+      avatar: "",
       period,
       duration,
       rent:
@@ -219,7 +219,7 @@ function LeaseManagement() {
       icon: Building2,
       iconBgColor: "bg-red-500",
       gradient: "from-yellow-100 via-orange-50 to-yellow-50",
-      backgroundImage: cardimg1,
+      backgroundImage: "",
     },
     {
       id: 2,
@@ -228,7 +228,7 @@ function LeaseManagement() {
       icon: Clock,
       iconBgColor: "bg-orange-500",
       gradient: "from-pink-100 via-red-50 to-pink-50",
-      backgroundImage: cardimg2,
+      backgroundImage: "",
     },
     {
       id: 3,
@@ -237,7 +237,7 @@ function LeaseManagement() {
       icon: FileX,
       iconBgColor: "bg-blue-500",
       gradient: "from-green-100 via-teal-50 to-green-50",
-      backgroundImage: cardimg3,
+      backgroundImage: "",
     },
     {
       id: 4,
@@ -246,7 +246,7 @@ function LeaseManagement() {
       icon: Shield,
       iconBgColor: "bg-red-600",
       gradient: "from-red-100 via-pink-50 to-red-50",
-      backgroundImage: cardimg4,
+      backgroundImage: "",
     },
   ]
 
@@ -283,15 +283,7 @@ function LeaseManagement() {
             const IconComponent = card.icon
             return (
               <Card key={card.id} className="relative overflow-hidden shadow-md border w-[298px] h-[127px]">
-                <div
-                  className="absolute inset-0 bg-no-repeat bg-[length:150%] opacity-35"
-                  style={{
-                    backgroundImage: `url('${card.backgroundImage}')`,
-                    backgroundPosition: card.backgroundImage === cardimg1 ? "100px 10px" : card.backgroundImage === cardimg2 ? "-162px -130px" : card.backgroundImage === cardimg3 ? "-340px -110px" : card.backgroundImage === cardimg4 ? "-192px -150px" : "10px 10px",
-                    transform: card.backgroundImage === cardimg2 ? "rotate(180deg)" : card.backgroundImage === cardimg3 ? "rotate(180deg)" : card.backgroundImage === cardimg4 ? "rotate(180deg)" : "none",
-                    backgroundSize: card.backgroundImage === cardimg2 ? "110%" : card.backgroundImage === cardimg3 ? "185%" : card.backgroundImage === cardimg4 ? "140%" : "none",
-                  }}
-                ></div>
+
 
                 <div className="absolute inset-0 bg-white opacity-30"></div>
 

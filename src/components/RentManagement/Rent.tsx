@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Building2, ChevronLeft, ChevronRight, X, } from "lucide-react";
 import Card2 from "./Card";
 // import frame2 from "../../assets/cardimg1.png";
-import frame3 from "../../assets/image 315.png";
+// import frame3 from "../../assets/image 315.png";
 import { BiSolidBuildings } from "react-icons/bi";
 import { FONTS } from "../../constants/ui constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -362,7 +362,7 @@ const Rent: React.FC = () => {
 
       <div className="flex mb-6 gap-6">
         <Card2
-          bgImage={frame3}
+          bgImage=""
           icon={<Building2 />}
           title="Total Due"
           subText="This Month"
@@ -371,7 +371,7 @@ const Rent: React.FC = () => {
           iconTextColor="text-pink-600"
         />
         <Card2
-          bgImage={frame3}
+          bgImage=""
           icon={<Building2 />}
           title="Collected"
           subText="This Month"
@@ -380,7 +380,7 @@ const Rent: React.FC = () => {
           iconTextColor="text-green-600"
         />
         <Card2
-          bgImage={frame3}
+          bgImage=""
           icon={<Building2 />}
           title="Pending"
           subText="This Month"
@@ -389,7 +389,7 @@ const Rent: React.FC = () => {
           iconTextColor="text-yellow-600"
         />
         <Card2
-          bgImage={frame3}
+          bgImage=""
           icon={<Building2 />}
           title="Total Deposits"
           subText=""
