@@ -565,9 +565,9 @@ export default function Tenants() {
 												{tenant?.tenant_type === 'rent' ? 'Rent' : 'Lease'}{' '}
 												Duration
 											</span>
-											<span className='text-xs text-gray-600 ml-20'>
+											{tenant?.tenant_type === 'rent' && (<span className='text-xs text-gray-600 ml-20'>
 												Monthly due date
-											</span>
+											</span>)}
 											<span className='text-xs text-gray-600'>
 												Days Remaining
 											</span>

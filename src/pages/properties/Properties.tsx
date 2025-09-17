@@ -167,7 +167,7 @@ function Properties() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
- 
+
   const mappedProperties: Property[] =
     properties?.map((p: any, index: number) => ({
       id: index + 1,
@@ -194,7 +194,7 @@ function Properties() {
       _id: p._id,
     })) || [];
 
-    console.log(mappedProperties, "")
+  console.log(mappedProperties, "")
 
   const filteredProperties = mappedProperties.filter((property) => {
     const propertyTag = property.tag?.toLowerCase() || "";
@@ -897,12 +897,6 @@ function Properties() {
                         >
                           House
                         </SelectItem>
-                        <SelectItem
-                          value="land"
-                          className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
-                        >
-                          Land
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.propertyType && (
@@ -1130,42 +1124,6 @@ function Properties() {
               </div>
 
               <div className="space-y-4">
-                {/* Upload Image */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-                    {unitForm.image ? (
-                      <img
-                        src={unitForm.image}
-                        alt="unit"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-400">No Image</span>
-                    )}
-                  </div>
-                  <div>
-                    <input
-                      type="file"
-                      id="unit-image-upload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                    />
-                    <label
-                      htmlFor="unit-image-upload"
-                      className="px-4 py-2 bg-[#13A5A5] hover:bg-[#13A5A5]/90 text-white rounded-lg cursor-pointer flex items-center gap-2"
-                    >
-                      <img src={uploadImg} alt="upload" className="w-4 h-4" />
-                      Upload Image
-                    </label>
-                  </div>
-                </div>
-
-                {/* Unit Information */}
-                <h2 className="font-semibold text-lg flex items-center gap-2 mb-2 ">
-                  <Building2 /> Unit Information
-                </h2>
-
                 {/* Form Fields */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   {/* Property */}

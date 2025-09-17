@@ -340,12 +340,6 @@ function LeaseManagement() {
               <SelectItem value="expired" className="text-gray-700 hover:bg-[#ed32371A]/5">
                 Expired
               </SelectItem>
-              <SelectItem value="terminated" className="text-gray-700 hover:bg-[#ed32371A]/5">
-                Terminated
-              </SelectItem>
-              <SelectItem value="renewed" className="text-gray-700 hover:bg-[#ed32371A]/5">
-                Renewed
-              </SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -313,7 +313,8 @@ export default function
 	const validateForm = () => {
 		let isValid = true;
 
-		const requiredFields: Array<keyof TenantFormData> = [
+		// Always required fields
+		let requiredFields: Array<keyof TenantFormData> = [
 			'fullName',
 			'emailAddress',
 			'phoneNumber',
@@ -321,22 +322,32 @@ export default function
 			'propertytype',
 			'propertyName',
 			'tenantType',
-			'unit',
-			'rent',
-			'securityDeposit',
-			'maintanance',
-			'leaseStartDate',
-			'leaseEndDate',
 			'contactName',
 			'contactPhone',
 			'bankName',
 			'accountNumber',
-			'ifscNumber',
-			'rentDueDate'
+			'ifscNumber'
 		];
 
+		if (formData.tenantType === 'rent') {
+			requiredFields.push(
+				'unit',
+				'rent',
+				'securityDeposit',
+				'maintanance',
+				'rentDueDate'
+			);
+		}
+
+		if (formData.tenantType === 'lease') {
+			requiredFields.push(
+				'leaseStartDate',
+				'leaseEndDate'
+			);
+		}
+
 		requiredFields.forEach((field) => {
-			if (!validateField(field, String(formData[field]))) {
+			if (!validateField(field, String(formData[field] ?? ''))) {
 				isValid = false;
 			}
 		});
@@ -352,6 +363,7 @@ export default function
 
 		return isValid;
 	};
+
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
