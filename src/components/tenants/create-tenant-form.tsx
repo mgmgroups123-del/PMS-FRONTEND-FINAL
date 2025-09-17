@@ -178,8 +178,6 @@ export default function
 			case 'leaseStartDate':
 			case 'leaseEndDate':
 				if (!value.trim()) error = 'This field is required';
-				else if (new Date(value) < new Date())
-					error = 'Date cannot be in the past';
 				else if (
 					field === 'leaseEndDate' &&
 					formData.leaseStartDate &&

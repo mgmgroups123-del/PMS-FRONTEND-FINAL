@@ -553,12 +553,12 @@ function Properties() {
                 >
                   House
                 </SelectItem>
-                <SelectItem
+                {/* <SelectItem
                   value="land"
                   className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
                 >
                   Land
-                </SelectItem>
+                </SelectItem> */}
               </SelectContent>
             </Select>
           </div>
