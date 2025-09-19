@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { Input } from "../ui/input";
 import searchImg from '../../assets/properties/search.png';
 import { GetLocalStorage } from "../../utils/localstorage";
+import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
 
 interface PersonalInformation {
   full_name: string;
@@ -201,6 +202,8 @@ const Rent: React.FC = () => {
       };
 
       await dispatch(fetchRentThunk(fetchParams));
+      // Refresh dashboard data to update pending payments count
+      dispatch(DashboardThunks());
     } catch (error) {
       console.error('Status update failed:', error);
       toast.error('Failed to update status. Please try again.');
@@ -225,6 +228,8 @@ const Rent: React.FC = () => {
         year: "2025"
       };
       await dispatch(fetchRentThunk(fetchParams));
+      // Refresh dashboard data to update pending payments count
+      dispatch(DashboardThunks());
 
       setIsDeleteModalOpen(false);
       setIsModalOpen(false);
@@ -858,10 +863,10 @@ const Rent: React.FC = () => {
                         <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusStyle(selectedRent.status)}`}></span>
                         <span className="font-medium capitalize">{selectedRent.status || "N/A"}</span>
                       </div>
-                      <div>
+                      {/* <div>
                         <span className="text-sm text-[#7D7D7D]">Security Deposit:</span>
                         <span className="ml-2 font-medium">₹{selectedRent.tenantId?.deposit || "0"}</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 

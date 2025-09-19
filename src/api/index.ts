@@ -78,6 +78,8 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.unit.getbyId + params),
 		update: (params: string, data: any) =>
 			HttpClient.update(HTTP_END_POINTS.unit.update + params, data),
+		delete: (params: string) =>
+			HttpClient.delete(HTTP_END_POINTS.unit.delete.replace(':uuid', params)),
 	};
 	rent = {
 		getAll: (params: any) =>

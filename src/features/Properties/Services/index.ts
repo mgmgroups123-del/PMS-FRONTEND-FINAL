@@ -86,3 +86,14 @@ export const updatePropertyId=async(uuid:any,data:any)=>{
     throw error
   }
 }
+
+export const deleteUnit = async (uuid: string) => {
+  try {
+    const res = await Client.unit.delete(uuid);
+    console.log("Delete unit:", res);
+    return res;
+  } catch (error) {
+    console.log("Error deleting unit:", error);
+    throw error;
+  }
+}

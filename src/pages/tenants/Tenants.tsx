@@ -39,6 +39,7 @@ import { deleteTenants } from '../../features/tenants/services';
 import toast from 'react-hot-toast';
 import { Card } from '../../components/ui/card';
 import { GetLocalStorage } from '../../utils/localstorage';
+import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk';
 
 interface Tenant {
 	id: string;
@@ -170,6 +171,8 @@ export default function Tenants() {
 				if (response) {
 					toast.success('Tenant deleted successfully!');
 					fetchTenants();
+					// Refresh dashboard data to update pending payments count
+					dispatch(DashboardThunks());
 					setIsDeleteModalOpen(false);
 					setTenantToDelete(null);
 				}
@@ -468,8 +471,8 @@ export default function Tenants() {
 
 									<div
 										className={`grid ${tenant?.tenant_type === 'rent'
-												? 'grid-cols-3'
-												: 'grid-cols-2'
+												? 'grid-cols-2'
+												: 'grid-cols-3'
 											} gap-3 mb-4`}
 									>
 										{tenant?.tenant_type === 'rent' ? (
@@ -544,19 +547,21 @@ export default function Tenants() {
 												</div>
 											</>
 										)}
-										<div className='bg-green-50 p-3 rounded-lg'>
-											<div className='flex items-center gap-2 mb-1'>
-												<div className='w-5 h-5 bg-green-100 rounded flex items-center justify-center'>
-													₹
+										{tenant?.tenant_type === 'lease' && (
+											<div className='bg-green-50 p-3 rounded-lg'>
+												<div className='flex items-center gap-2 mb-1'>
+													<div className='w-5 h-5 bg-green-100 rounded flex items-center justify-center'>
+														₹
+													</div>
+													<p className='text-xs text-[#1ec95a]'>
+														Security Deposit
+													</p>
 												</div>
-												<p className='text-xs text-[#1ec95a]'>
-													Security Deposit
+												<p className='font-bold ml-8 text-lg text-[#1ec95a]'>
+													₹{Number(tenant.deposit).toLocaleString()}
 												</p>
 											</div>
-											<p className='font-bold ml-8 text-lg text-[#1ec95a]'>
-												₹{Number(tenant.deposit).toLocaleString()}
-											</p>
-										</div>
+										)}
 									</div>
 
 									<div className='mb-4'>

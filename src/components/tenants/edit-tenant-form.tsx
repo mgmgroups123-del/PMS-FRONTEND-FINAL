@@ -24,6 +24,8 @@ import {
 	getPropertyData,
 } from '../../features/tenants/services';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk';
 
 interface EditTenantFormProps {
 	isOpen: boolean;
@@ -38,6 +40,7 @@ export default function EditTenantForm({
 	onClose,
 	fetchTenants,
 }: EditTenantFormProps) {
+	const dispatch = useDispatch<any>();
 	const [formData, setFormData] = useState<any>({
 		fullName: '',
 		emailAddress: '',
@@ -165,7 +168,6 @@ export default function EditTenantForm({
 		formData.cgst,
 		formData.sgst,
 		formData.tds,
-		formData.hasGst,
 	]);
 
 	const calculateTotalRent = () => {
@@ -175,19 +177,23 @@ export default function EditTenantForm({
 		const sgstPercentage = parseFloat(formData.sgst) || 0;
 		const tdsPercentage = parseFloat(formData.tds) || 0;
 
-		let total = rent + maintenance;
+		let subtotal = 0;
+		let total = 0;
 
-		if (formData.hasGst && formData.tenantType === 'rent') {
+		if (formData.tenantType === 'rent') {
 			const cgstAmount = (rent * cgstPercentage) / 100;
 			const sgstAmount = (rent * sgstPercentage) / 100;
-			total += cgstAmount + sgstAmount;
+			const tdsAmount = (rent * Math.abs(tdsPercentage)) / 100;
+			
+			subtotal = rent + maintenance + cgstAmount + sgstAmount;
+			total = rent + maintenance - tdsAmount;
+		} else {
+			total = rent + maintenance;
 		}
-
-		const tdsAmount = (total * Math.abs(tdsPercentage)) / 100;
-		total -= tdsAmount;
 
 		setFormData((prev: any) => ({
 			...prev,
+			subtotal: subtotal.toFixed(2),
 			totalmonthlyrent: total.toFixed(2),
 		}));
 	};
@@ -244,7 +250,7 @@ export default function EditTenantForm({
 				tenant_type: formData.tenantType,
 				unit: formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.securityDeposit,
+				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
 				financial_information: {
 					rent: formData.rent,
 					...(formData.tenantType === 'rent' &&
@@ -269,6 +275,8 @@ export default function EditTenantForm({
 			if (response) {
 				toast.success('Tenant updated successfully!');
 				fetchTenants();
+				// Refresh dashboard data to update pending payments count
+				dispatch(DashboardThunks());
 				onClose();
 			}
 		} catch (error) {
@@ -469,17 +477,19 @@ export default function EditTenantForm({
 											/>
 										</div>
 									)}
-									<div className='space-y-2'>
-										<Label htmlFor='securityDeposit'>Security Deposit</Label>
-										<Input
-											id='securityDeposit'
-											value={formData.securityDeposit}
-											onChange={(e) =>
-												handleInputChange('securityDeposit', e.target.value)
-											}
-											placeholder='Enter security deposit'
-										/>
-									</div>
+									{formData.tenantType === 'lease' && (
+										<div className='space-y-2'>
+											<Label htmlFor='securityDeposit'>Security Deposit</Label>
+											<Input
+												id='securityDeposit'
+												value={formData.securityDeposit}
+												onChange={(e) =>
+													handleInputChange('securityDeposit', e.target.value)
+												}
+												placeholder='Enter security deposit'
+											/>
+										</div>
+									)}
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge</Label>
 										<Input
@@ -555,18 +565,29 @@ export default function EditTenantForm({
 									)}
 								</div>
 								{formData.tenantType === 'rent' && (
-									<div className='space-y-2 col-span-2'>
-										<Label htmlFor='totalmonthlyrent'>Total Monthly Rent</Label>
-										<Input
-											id='totalmonthlyrent'
-											value={formData.totalmonthlyrent}
-											onChange={(e: any) =>
-												handleInputChange('totalmonthlyrent', e.target.value)
-											}
-											placeholder='Calculated amount'
-											readOnly
-										/>
-									</div>
+									<>
+										<div className='space-y-2'>
+											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
+											<Input
+												id='subtotal'
+												value={formData.subtotal || '0.00'}
+												placeholder='Calculated subtotal'
+												readOnly
+											/>
+										</div>
+										<div className='space-y-2'>
+											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance - TDS)</Label>
+											<Input
+												id='totalmonthlyrent'
+												value={formData.totalmonthlyrent}
+												onChange={(e: any) =>
+													handleInputChange('totalmonthlyrent', e.target.value)
+												}
+												placeholder='Calculated total'
+												readOnly
+											/>
+										</div>
+									</>
 								)}
 							</CardContent>
 						</Card>

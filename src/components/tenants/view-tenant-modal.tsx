@@ -185,17 +185,19 @@ export default function ViewTenantModal({
 											: '0'}
 									</div>
 								</div>
-								<div className='space-y-2'>
-									<Label>Security Deposit</Label>
-									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										₹
-										{singleTenantData?.deposit
-											? Number.parseInt(
-													singleTenantData?.deposit
-											  ).toLocaleString()
-											: '0'}
+								{singleTenantData?.tenant_type === 'lease' && (
+									<div className='space-y-2'>
+										<Label>Security Deposit</Label>
+										<div className='p-2 bg-gray-50 rounded border text-sm'>
+											₹
+											{singleTenantData?.deposit
+												? Number.parseInt(
+														singleTenantData?.deposit
+												  ).toLocaleString()
+												: '0'}
+										</div>
 									</div>
-								</div>
+								)}
 								<div className='space-y-2'>
 									<Label>Bank Name</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>

@@ -31,6 +31,8 @@ import {
 	X,
 } from 'lucide-react';
 import { GetByIdLandService, GetLandsDetails } from '../../features/lands/service';
+import { useDispatch } from 'react-redux';
+import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk';
 
 export interface TenantFormData {
 	fullName: string;
@@ -50,6 +52,7 @@ export interface TenantFormData {
 	tds: string;
 	maintanance: string;
 	totalmonthlyrent: string;
+	subtotal?: string;
 	teamSpecialized: string;
 	leaseStartDate: string;
 	leaseEndDate: string;
@@ -75,6 +78,7 @@ export default function
 		onClose,
 		fetchTenants,
 	}: AddTenantFormProps) {
+	const dispatch = useDispatch<any>();
 	const [formData, setFormData] = useState<TenantFormData>({
 		fullName: '',
 		emailAddress: '',
@@ -153,10 +157,11 @@ export default function
 			// 	else if (Number(value) <= 0) error = 'Rent must be greater than 0';
 			// 	break;
 			case 'securityDeposit':
-				if (!value.trim()) error = 'Security deposit is required';
-				else if (isNaN(Number(value)))
+				// Security deposit only required for lease type
+				if (formData.tenantType === 'lease' && !value.trim()) error = 'Security deposit is required';
+				else if (value.trim() && isNaN(Number(value)))
 					error = 'Security deposit must be a number';
-				else if (Number(value) < 0)
+				else if (value.trim() && Number(value) < 0)
 					error = 'Security deposit cannot be negative';
 				break;
 			case 'maintanance':
@@ -261,41 +266,34 @@ export default function
 		formData.cgst,
 		formData.sgst,
 		formData.tds,
-		formData.hasGst,
 	]);
 
 	const calculateTotalRent = () => {
-		const rent = parseFloat(formData.rent) || 0;
+		const basicRent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
 		const cgstPercentage = parseFloat(formData.cgst) || 0;
 		const sgstPercentage = parseFloat(formData.sgst) || 0;
 		const tdsPercentage = parseFloat(formData.tds) || 0;
 		const deposit = parseFloat(formData.securityDeposit) || 0;
 
-		let subtotal = rent
+		let subtotal = 0;
+		let total = 0;
 
-		let cgstAmount = 0;
-		let sgstAmount = 0;
-		let tdsAmount = 0;
-		let total = subtotal;
-
-		if (formData.hasGst && formData.tenantType === 'rent') {
-			cgstAmount = (subtotal * cgstPercentage) / 100;
-			sgstAmount = (subtotal * sgstPercentage) / 100;
-			total = subtotal + cgstAmount + sgstAmount;
-			tdsAmount = (total * Math.abs(tdsPercentage)) / 100;
-			total -= tdsAmount;
-			total += maintenance;
+		if (formData.tenantType === 'rent') {
+			const subtotalBeforeGST = basicRent + maintenance;
+			const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
+			const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
+			const tds = (subtotalBeforeGST * Math.abs(tdsPercentage)) / 100;
+			
+			subtotal = subtotalBeforeGST + cgst + sgst;
+			total = subtotalBeforeGST - tds;
 		} else if (formData.tenantType === 'lease') {
-			total = maintenance + deposit
+			total = maintenance + deposit;
 		}
 
 		setFormData((prev) => ({
 			...prev,
 			subtotal: subtotal.toFixed(2),
-			cgstAmount: cgstAmount.toFixed(2),
-			sgstAmount: sgstAmount.toFixed(2),
-			tdsAmount: tdsAmount.toFixed(2),
 			totalmonthlyrent: total.toFixed(2),
 		}));
 	};
@@ -331,7 +329,6 @@ export default function
 			requiredFields.push(
 				'unit',
 				'rent',
-				'securityDeposit',
 				'maintanance',
 				'rentDueDate'
 			);
@@ -339,6 +336,7 @@ export default function
 
 		if (formData.tenantType === 'lease') {
 			requiredFields.push(
+				'securityDeposit',
 				'leaseStartDate',
 				'leaseEndDate'
 			);
@@ -397,7 +395,7 @@ export default function
 				unit_type: selectedProperty === "land" ? "land" : "unit",
 				unit: selectedProperty === "land" ? landId : formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.securityDeposit,
+				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
 				is_active: true,
 				is_deleted: false,
 				financial_information: {
@@ -422,6 +420,8 @@ export default function
 			if (response) {
 				toast.success('New tenant created successfully!');
 				fetchTenants();
+				// Refresh dashboard data to update pending payments count
+				dispatch(DashboardThunks());
 				setFormData({
 					fullName: '',
 					emailAddress: '',
@@ -850,23 +850,25 @@ export default function
 											)}
 										</div>
 									)}
-									<div className='space-y-2'>
-										<Label htmlFor='securityDeposit'>Security Deposit *</Label>
-										<Input
-											id='securityDeposit'
-											value={formData.securityDeposit}
-											onChange={(e) =>
-												handleInputChange('securityDeposit', e.target.value)
-											}
-											placeholder='Enter security deposit'
-											className={errors.securityDeposit ? 'border-red-500' : ''}
-										/>
-										{errors.securityDeposit && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.securityDeposit}
-											</p>
-										)}
-									</div>
+									{formData.tenantType === 'lease' && (
+										<div className='space-y-2'>
+											<Label htmlFor='securityDeposit'>Security Deposit *</Label>
+											<Input
+												id='securityDeposit'
+												value={formData.securityDeposit}
+												onChange={(e) =>
+													handleInputChange('securityDeposit', e.target.value)
+												}
+												placeholder='Enter security deposit'
+												className={errors.securityDeposit ? 'border-red-500' : ''}
+											/>
+											{errors.securityDeposit && (
+												<p className='text-red-500 text-xs mt-1'>
+													{errors.securityDeposit}
+												</p>
+											)}
+										</div>
+									)}
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
 										<Input
@@ -967,18 +969,29 @@ export default function
 								</div>
 
 								{formData.tenantType === 'rent' && (
-									<div className='space-y-2 col-span-2'>
-										<Label htmlFor='totalmonthlyrent'>Total Monthly Rent</Label>
-										<Input
-											id='totalmonthlyrent'
-											value={formData.totalmonthlyrent}
-											onChange={(e: any) =>
-												handleInputChange('totalmonthlyrent', e.target.value)
-											}
-											placeholder='Calculated amount'
-											readOnly
-										/>
-									</div>
+									<>
+										<div className='space-y-2'>
+											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
+											<Input
+												id='subtotal'
+												value={formData.subtotal || '0.00'}
+												placeholder='Calculated subtotal'
+												readOnly
+											/>
+										</div>
+										<div className='space-y-2'>
+											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance - TDS)</Label>
+											<Input
+												id='totalmonthlyrent'
+												value={formData.totalmonthlyrent}
+												onChange={(e: any) =>
+													handleInputChange('totalmonthlyrent', e.target.value)
+												}
+												placeholder='Calculated total'
+												readOnly
+											/>
+										</div>
+									</>
 								)}
 							</CardContent>
 						</Card>
