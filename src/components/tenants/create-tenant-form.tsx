@@ -397,7 +397,7 @@ export default function
 				unit_type: selectedProperty === "land" ? "land" : "unit",
 				unit: selectedProperty === "land" ? landId : formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
+				deposit: formData.securityDeposit,
 				is_active: true,
 				is_deleted: false,
 				financial_information: {
@@ -853,7 +853,7 @@ export default function
 											)}
 										</div>
 									)}
-									{formData.tenantType === 'lease' && (
+									
 										<div className='space-y-2'>
 											<Label htmlFor='securityDeposit'>Security Deposit *</Label>
 											<Input
@@ -871,7 +871,7 @@ export default function
 												</p>
 											)}
 										</div>
-									)}
+								
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
 										<Input

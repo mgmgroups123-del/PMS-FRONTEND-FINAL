@@ -250,7 +250,7 @@ export default function EditTenantForm({
 				tenant_type: formData.tenantType,
 				unit: formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
+				deposit:  formData.securityDeposit,
 				financial_information: {
 					rent: formData.rent,
 					...(formData.tenantType === 'rent' &&
@@ -260,12 +260,6 @@ export default function EditTenantForm({
 						tds: formData.tds,
 					}),
 					maintenance: formData.maintanance,
-				},
-				bank_details: {
-					bank_name: formData.bankName,
-					account_number: formData.accountNumber,
-					bank_branch: formData.branch,
-					bank_IFSC: formData.ifscNumber,
 				},
 			};
 			const response = await editTenants({
@@ -478,7 +472,7 @@ export default function EditTenantForm({
 											/>
 										</div>
 									)}
-									{formData.tenantType === 'lease' && (
+									
 										<div className='space-y-2'>
 											<Label htmlFor='securityDeposit'>Security Deposit</Label>
 											<Input
@@ -490,7 +484,7 @@ export default function EditTenantForm({
 												placeholder='Enter security deposit'
 											/>
 										</div>
-									)}
+								
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge</Label>
 										<Input
