@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { selectOccReport } from "../../features/OccupancyReport/Reducers/Selector";
 import { loadOccReport } from "../../features/OccupancyReport/Reducers/OccreportThunk";
-import { selectProperties } from "../../features/Properties/Reducers/Selectors";
+// import { selectProperties } from "../../features/Properties/Reducers/Selectors";
 import { getAllPropertiesReport } from "../../features/Properties/Services";
 
 const chartConfig = {
