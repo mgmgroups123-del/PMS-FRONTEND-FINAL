@@ -86,9 +86,9 @@ function Reports() {
     else if (num >= 100000) return `${(num / 100000).toFixed(2)} Lakh`;
     return num.toString();
   };
-  const totalunit = occReportData?.overall?.totalUnits || 0;
-  const totalOccupied = occReportData?.overall?.occupiedUnits || 0;
-  const totalVacant = occReportData?.overall?.vacantUnits || 0;
+  const totalunit = occReportData?.overall?.total || 0;
+  const totalOccupied = occReportData?.overall?.occupied || 0;
+  const totalVacant = occReportData?.overall?.vacant || 0;
 
   const handleDownloadExcel = async () => {
     try {
