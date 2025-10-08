@@ -259,6 +259,7 @@ export default function Tenants() {
 		return typeMatch && searchMatch;
 	});
 
+
 	const getItemClassName = (value: string) => {
 		const baseClasses = 'hover:bg-[#B200FF] hover:text-white mb-0.5';
 		const selectedClasses =
@@ -470,10 +471,7 @@ export default function Tenants() {
 									</div>
 
 									<div
-										className={`grid ${tenant?.tenant_type === 'rent'
-												? 'grid-cols-2'
-												: 'grid-cols-3'
-											} gap-3 mb-4`}
+										className={`grid grid-cols-3 gap-3 mb-4`}
 									>
 										{tenant?.tenant_type === 'rent' ? (
 											<>
@@ -493,6 +491,19 @@ export default function Tenants() {
 														).toLocaleString()}
 													</p>
 												</div>
+												<div className='bg-purple-50 p-3 rounded-lg relative'>
+													<div className='flex items-center gap-2 mb-1'>
+														<div className='w-5 h-5 bg-purple-100 rounded flex items-center justify-center'>
+															₹
+														</div>
+														<p className='text-xs text-[#a17293]'>
+															Security Deposit
+														</p>
+													</div>
+													<p className='font-bold ml-8 text-lg text-[#6e0659]'>
+														₹{Number(tenant?.deposit).toLocaleString()}
+													</p>
+												</div>
 												<div className='bg-yellow-50 p-3 rounded-lg relative'>
 													<div className='flex items-center gap-2 mb-1'>
 														<div className='w-5 h-5 bg-yellow-100 rounded flex items-center justify-center'>
@@ -505,13 +516,6 @@ export default function Tenants() {
 													<p className='font-bold ml-8 text-lg text-[#c9c61e]'>
 														₹{Number(tenant?.rent).toLocaleString()}
 													</p>
-													<span
-														className=' text-black font-normal absolute bottom-1.5 right-1.5'
-														style={{ fontSize: '8px' }}
-													>
-														{' '}
-														(include GST)
-													</span>
 												</div>
 												{/* <div className='bg-yellow-50 p-3 rounded-lg relative'>
 													<div className='flex items-center gap-2 mb-1'>
@@ -660,8 +664,8 @@ export default function Tenants() {
 											key={option}
 											value={option.toString()}
 											className={`hover:bg-[#ed3237] hover:text-white mb-0.5 ${pagination.rowsPerPage === option
-													? 'bg-[#ed3237] text-white'
-													: ''
+												? 'bg-[#ed3237] text-white'
+												: ''
 												}`}
 										>
 											{option}
@@ -706,8 +710,8 @@ export default function Tenants() {
 												key={page}
 												onClick={() => handlePageChange(page)}
 												className={`px-3 py-2 text-sm rounded-lg border transition-colors ${page === pagination.currentPage
-														? 'bg-[#ed3237] text-white border-[#ed3237]'
-														: 'border-gray-300 hover:bg-gray-50'
+													? 'bg-[#ed3237] text-white border-[#ed3237]'
+													: 'border-gray-300 hover:bg-gray-50'
 													}`}
 											>
 												{page}
