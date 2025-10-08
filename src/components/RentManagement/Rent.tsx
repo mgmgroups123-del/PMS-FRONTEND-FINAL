@@ -892,15 +892,15 @@ const Rent: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">CGST</span>
-                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.cgst || "0"} %</span>
+                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.cgst || "9"} %</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">SGST</span>
-                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.sgst || "0"} %</span>
+                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.sgst || "9"} %</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-gray-200">
                         <span className="text-[#7D7D7D]">TDS Deduction</span>
-                        <span className="text-red-500 font-medium">{selectedRent.tenantId?.financial_information?.tds || "0"} %</span>
+                        <span className="text-red-500 font-medium">{selectedRent.tenantId?.financial_information?.tds || "-10"} %</span>
                       </div>
                       <div className="flex justify-between pt-3 border-t border-gray-200">
                         <span className="font-semibold">Total Amount</span>
