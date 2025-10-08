@@ -888,7 +888,7 @@ const Rent: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">Maintenance</span>
-                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.maintanence || "0"}</span>
+                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.maintenance || "0"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">CGST</span>
