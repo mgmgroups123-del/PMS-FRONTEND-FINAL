@@ -17,6 +17,7 @@ import { loadOccReport } from "../../features/OccupancyReport/Reducers/Occreport
 import { selectOccReport } from "../../features/OccupancyReport/Reducers/Selector";
 import { downloadAllRentPdf, downloadRentExcel } from '../../features/Rent/service'
 import toast from "react-hot-toast";
+import { fetchDownloadReport } from "../../features/OccupancyReport/Service";
 
 function Reports() {
   const [activeBtn, setActiveBtn] = useState("financial");
@@ -35,6 +36,38 @@ function Reports() {
     dispatch(fetchGetProperties());
     dispatch(loadOccReport()); // Load occupancy report
   }, [dispatch]);
+
+
+  const downloadReport = async (format: string) => {
+  try {
+    // Make sure your API returns response as blob
+    const res:any = await fetchDownloadReport({ format });
+
+    // Convert to blob
+    const blob = new Blob([res.data], {
+      type: format === "pdf"
+        ? "application/pdf"
+        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `report_${new Date().toISOString().slice(0, 10)}.${format === "pdf" ? "pdf" : "xlsx"}`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Report Downloaded Successfully");
+  } catch (error) {
+    console.error("Download error:", error);
+    toast.error("Failed to download report");
+  }
+};
+
 
   const options = [
     "Last 30 Days",
@@ -82,7 +115,7 @@ function Reports() {
 
   const handleDownloadPdf = async () => {
     try {
-      const Tenant:any = {tenant_type: selectedType}
+      const Tenant: any = { tenant_type: selectedType }
       const response = await downloadAllRentPdf(Tenant);
       toast.success("Rent report pdf downloaded successfully");
 
@@ -103,6 +136,22 @@ function Reports() {
     }
   };
 
+  const handleDownloadPdfFormat = async (format:string) => {
+    if (activeBtn === "tenant") {
+      handleDownloadPdf()
+    } else {
+      downloadReport(format)
+    }
+  }
+
+  const handleDownloadExcelFormat = async (format:string) => {
+    if (activeBtn === "tenant") {
+      handleDownloadExcel()
+    } else {
+      downloadReport(format)
+    }
+  }
+
   return (
     <div className="p-3">
       {/* Header Section */}
@@ -118,8 +167,8 @@ function Reports() {
         </section>
 
         <section className='flex justify-center items-center gap-4'>
-          <button onClick={handleDownloadPdf} className='flex justify-between items-center text-[#FFFFFF] px-3 py-2 rounded-lg gap-2' style={{ ...FONTS.button_Text, background: COLORS.primary_purple }}> <img src={Download} alt="Download" className='w-5 h-5' /> Export PDF</button>
-          <button onClick={handleDownloadExcel} className='flex justify-between items-center text-[#FFFFFF] px-3 py-2 rounded-lg gap-2' style={{ ...FONTS.button_Text, background: COLORS.button_dark_green }}> <img src={Download} alt="Download" className='w-5 h-5' /> Export Excel</button>
+          <button onClick={()=> handleDownloadPdfFormat('pdf')} className='flex justify-between items-center text-[#FFFFFF] px-3 py-2 rounded-lg gap-2' style={{ ...FONTS.button_Text, background: COLORS.primary_purple }}> <img src={Download} alt="Download" className='w-5 h-5' /> Export PDF</button>
+          <button onClick={()=> handleDownloadExcelFormat('excel')} className='flex justify-between items-center text-[#FFFFFF] px-3 py-2 rounded-lg gap-2' style={{ ...FONTS.button_Text, background: COLORS.button_dark_green }}> <img src={Download} alt="Download" className='w-5 h-5' /> Export Excel</button>
         </section>
       </div>
 
@@ -187,7 +236,7 @@ function Reports() {
               <p>Tenant Report</p>
             </button>
 
-           
+
           </section>
         </div>
 
@@ -203,9 +252,8 @@ function Reports() {
             >
               {selectedOption}
               <svg
-                className={`ml-2 h-4 w-4 transition-transform ${
-                  isOpen ? "transform rotate-180" : ""
-                }`}
+                className={`ml-2 h-4 w-4 transition-transform ${isOpen ? "transform rotate-180" : ""
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -225,9 +273,8 @@ function Reports() {
                   <div
                     key={option}
                     style={{ ...FONTS.headers_description }}
-                    className={`px-4 py-2 hover:bg-[#ed32371A] border rounded-md cursor-pointer ${
-                      selectedOption === option ? "bg-[#ed32371A]" : ""
-                    }`}
+                    className={`px-4 py-2 hover:bg-[#ed32371A] border rounded-md cursor-pointer ${selectedOption === option ? "bg-[#ed32371A]" : ""
+                      }`}
                     onClick={() => handleOptionClick(option)}
                   >
                     {option}
@@ -318,8 +365,8 @@ function Reports() {
       {/* Reports Components */}
       {activeBtn === "financial" && <FinancialReport />}
       {activeBtn === "occupancy" && <OccupancyReport />}
-      {activeBtn === "tenant" && <TenantReport selectedType={selectedType} setSelectedType={setSelectedType}/>}
-  
+      {activeBtn === "tenant" && <TenantReport selectedType={selectedType} setSelectedType={setSelectedType} />}
+
 
     </div>
   );

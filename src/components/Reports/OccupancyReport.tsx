@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import Buildings from "../../assets/Reports/buildings.png";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { selectOccReport } from "../../features/OccupancyReport/Reducers/Selector";
 import { loadOccReport } from "../../features/OccupancyReport/Reducers/OccreportThunk";
 import { selectProperties } from "../../features/Properties/Reducers/Selectors";
+import { getAllPropertiesReport } from "../../features/Properties/Services";
 
 const chartConfig = {
   occupancy: {
@@ -24,9 +25,17 @@ const formatIndianCurrency = (num: any) => {
 };
 
 const OccupancyReport = () => {
-  const properties = useSelector(selectProperties);
+  const [properties, setProperties] = useState([])
   const dispatch = useDispatch<any>();
   const occReportData = useSelector(selectOccReport);
+
+  useEffect(()=> {
+      const response = async() => {
+        const res = await getAllPropertiesReport();
+        setProperties(res?.data || [])
+      }
+      response();
+    },[])
 
   useEffect(() => {
     dispatch(loadOccReport());
@@ -145,12 +154,12 @@ const OccupancyReport = () => {
             key={index}
             className="shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4"
           >
-            <p style={{ ...FONTS.Table_Header }}>{data?.property_name}</p>
+            <p style={{ ...FONTS.Table_Header }}>{data?.name}</p>
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
               {data?.total_units}
             </p>
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
-              {formatIndianCurrency(data?.property_revenue)}
+              {formatIndianCurrency(data?.revenue)}
             </p>
 
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">

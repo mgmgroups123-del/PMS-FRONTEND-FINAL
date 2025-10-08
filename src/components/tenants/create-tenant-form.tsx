@@ -235,17 +235,20 @@ export default function
 		let total = 0;
 
 		if (formData.tenantType === 'rent') {
-			const subtotalBeforeGST = basicRent + maintenance;
-			total = subtotalBeforeGST
-		} else if (formData.tenantType === 'lease') {
-			total = maintenance + deposit;
-		}
-
-		setFormData((prev) => ({
+			const total = basicRent + maintenance;
+			setFormData((prev) => ({
 			...prev,
 			subtotal: subtotal.toFixed(2),
 			totalmonthlyrent: total.toFixed(2),
 		}));
+		} else if (formData.tenantType === 'lease') {
+			const total = maintenance + deposit;
+			setFormData((prev) => ({
+			...prev,
+			subtotal: subtotal.toFixed(2),
+			totalmonthlyrent: total.toFixed(2),
+		}));
+		}
 	};
 
 	useEffect(() => {
