@@ -46,6 +46,10 @@ export interface TenantFormData {
 	propertyInformation: string;
 	rent: string;
 	securityDeposit: string;
+	hasGst: boolean;
+	cgst: string;
+	sgst: string;
+	tds: string;
 	maintanance: string;
 	totalmonthlyrent: string;
 	subtotal?: string;
@@ -55,6 +59,10 @@ export interface TenantFormData {
 	contactName: string;
 	contactPhone: string;
 	relationship: string;
+	bankName: string;
+	accountNumber: string;
+	branch: string;
+	ifscNumber: string;
 	rentDueDate: string;
 }
 
@@ -83,6 +91,10 @@ export default function
 		propertyInformation: '',
 		rent: '',
 		securityDeposit: '',
+		hasGst: false,
+		cgst: '9',
+		sgst: '9',
+		tds: '-10',
 		maintanance: '',
 		totalmonthlyrent: '',
 		teamSpecialized: '',
@@ -91,6 +103,10 @@ export default function
 		contactName: '',
 		contactPhone: '',
 		relationship: '',
+		bankName: '',
+		accountNumber: '',
+		branch: '',
+		ifscNumber: '',
 		rentDueDate: ''
 	});
 
@@ -142,7 +158,7 @@ export default function
 			// 	break;
 			case 'securityDeposit':
 				// Security deposit only required for lease type
-				if (!value.trim()) error = 'Security deposit is required';
+				if (formData.tenantType === 'lease' && !value.trim()) error = 'Security deposit is required';
 				else if (value.trim() && isNaN(Number(value)))
 					error = 'Security deposit must be a number';
 				else if (value.trim() && Number(value) < 0)
@@ -152,6 +168,17 @@ export default function
 				if (!value.trim()) error = 'Maintenance charge is required';
 				else if (isNaN(Number(value))) error = 'Maintenance must be a number';
 				else if (Number(value) < 0) error = 'Maintenance cannot be negative';
+				break;
+			case 'cgst':
+			case 'sgst':
+				if (formData.hasGst && !value.trim())
+					error = 'This field is required when GST is enabled';
+				else if (isNaN(Number(value))) error = 'Must be a number';
+				else if (Number(value) < 0) error = 'Cannot be negative';
+				break;
+			case 'tds':
+				if (!value.trim()) error = 'TDS is required';
+				else if (isNaN(Number(value))) error = 'TDS must be a number';
 				break;
 			case 'leaseStartDate':
 			case 'leaseEndDate':
@@ -175,6 +202,18 @@ export default function
 				else if (!/^[0-9]{10}$/.test(value))
 					error = 'Phone number must be 10 digits';
 				break;
+			// case 'bankName':
+			// 	if (!value.trim()) error = 'Bank name is required';
+			// 	break;
+			// case 'accountNumber':
+			// 	if (!value.trim()) error = 'Account number is required';
+			// 	else if (!/^[0-9]{9,18}$/.test(value)) error = 'Invalid account number';
+			// 	break;
+			// case 'ifscNumber':
+			// 	if (!value.trim()) error = 'IFSC code is required';
+			// 	else if (!/^[A-Za-z]{4}0[A-Z0-9a-z]{6}$/.test(value))
+			// 		error = 'Invalid IFSC format';
+			// 	break;
 			default:
 				break;
 		}
@@ -191,7 +230,7 @@ export default function
 
 		validateField(field, value);
 
-		if (['rent', 'maintanance'].includes(field)) {
+		if (['rent', 'maintanance', 'cgst', 'sgst', 'tds'].includes(field)) {
 			calculateTotalRent();
 		}
 	};
@@ -224,31 +263,41 @@ export default function
 	}, [
 		formData.rent,
 		formData.maintanance,
+		formData.cgst,
+		formData.sgst,
+		formData.tds,
 	]);
 
 	const calculateTotalRent = () => {
 		const basicRent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
+		const cgstPercentage = parseFloat(formData.cgst) || 0;
+		const sgstPercentage = parseFloat(formData.sgst) || 0;
+		const tdsPercentage = parseFloat(formData.tds) || 0;
 		const deposit = parseFloat(formData.securityDeposit) || 0;
 
 		let subtotal = 0;
 		let total = 0;
 
-		if (formData.tenantType === 'rent') {
-			const total = basicRent + maintenance;
-			setFormData((prev) => ({
-			...prev,
-			subtotal: subtotal.toFixed(2),
-			totalmonthlyrent: total.toFixed(2),
-		}));
+		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
+			const subtotalBeforeGST = basicRent + maintenance;
+			const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
+			const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
+			const tds = (subtotalBeforeGST * Math.abs(tdsPercentage)) / 100;
+			
+			subtotal = subtotalBeforeGST + cgst + sgst;
+			total = subtotalBeforeGST - tds;
 		} else if (formData.tenantType === 'lease') {
-			const total = maintenance + deposit;
-			setFormData((prev) => ({
+			total = maintenance + deposit;
+		}else if (formData.propertytype === 'residency') {
+			total = basicRent + maintenance;
+		}
+
+		setFormData((prev) => ({
 			...prev,
 			subtotal: subtotal.toFixed(2),
 			totalmonthlyrent: total.toFixed(2),
 		}));
-		}
 	};
 
 	useEffect(() => {
@@ -273,6 +322,9 @@ export default function
 			'tenantType',
 			'contactName',
 			'contactPhone',
+			'bankName',
+			'accountNumber',
+			'ifscNumber'
 		];
 
 		if (formData.tenantType === 'rent') {
@@ -297,6 +349,15 @@ export default function
 				isValid = false;
 			}
 		});
+
+		if (formData.hasGst) {
+			if (
+				!validateField('cgst', formData.cgst) ||
+				!validateField('sgst', formData.sgst)
+			) {
+				isValid = false;
+			}
+		}
 
 		return isValid;
 	};
@@ -336,13 +397,25 @@ export default function
 				unit_type: selectedProperty === "land" ? "land" : "unit",
 				unit: selectedProperty === "land" ? landId : formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.securityDeposit,
+				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
 				is_active: true,
 				is_deleted: false,
 				financial_information: {
 					rent: formData.rent,
+					...(formData.tenantType === 'rent' &&
+						formData.hasGst && {
+						cgst: formData.cgst,
+						sgst: formData.sgst,
+						tds: formData.tds,
+					}),
 					maintenance: formData.maintanance,
 				},
+				// bank_details: {
+				// 	bank_name: formData.bankName,
+				// 	account_number: formData.accountNumber,
+				// 	bank_branch: formData.branch,
+				// 	bank_IFSC: formData.ifscNumber,
+				// },
 			};
 
 			const response = await createTenants(payload);
@@ -363,6 +436,10 @@ export default function
 					propertyInformation: '',
 					rent: '',
 					securityDeposit: '',
+					hasGst: false,
+					cgst: '9',
+					sgst: '9',
+					tds: '-10',
 					maintanance: '',
 					totalmonthlyrent: '',
 					teamSpecialized: '',
@@ -371,6 +448,10 @@ export default function
 					contactName: '',
 					contactPhone: '',
 					relationship: '',
+					bankName: '',
+					accountNumber: '',
+					branch: '',
+					ifscNumber: '',
 					rentDueDate: ''
 				});
 				setErrors({});
@@ -398,6 +479,10 @@ export default function
 			propertyInformation: '',
 			rent: '',
 			securityDeposit: '',
+			hasGst: false,
+			cgst: '',
+			sgst: '',
+			tds: '',
 			maintanance: '',
 			totalmonthlyrent: '',
 			teamSpecialized: '',
@@ -406,6 +491,10 @@ export default function
 			contactName: '',
 			contactPhone: '',
 			relationship: '',
+			bankName: '',
+			accountNumber: '',
+			branch: '',
+			ifscNumber: '',
 			rentDueDate: ''
 		});
 		setErrors({});
@@ -540,6 +629,7 @@ export default function
 													{ value: 'apartment', label: 'Apartment' },
 													{ value: 'house', label: 'House' },
 													{ value: 'land', label: 'Land' },
+													{ value: 'residency', label: 'Residency' },
 												].map((item) => (
 													<SelectItem
 														key={item.value}
@@ -763,6 +853,25 @@ export default function
 											)}
 										</div>
 									)}
+									{formData.tenantType === 'lease' && (
+										<div className='space-y-2'>
+											<Label htmlFor='securityDeposit'>Security Deposit *</Label>
+											<Input
+												id='securityDeposit'
+												value={formData.securityDeposit}
+												onChange={(e) =>
+													handleInputChange('securityDeposit', e.target.value)
+												}
+												placeholder='Enter security deposit'
+												className={errors.securityDeposit ? 'border-red-500' : ''}
+											/>
+											{errors.securityDeposit && (
+												<p className='text-red-500 text-xs mt-1'>
+													{errors.securityDeposit}
+												</p>
+											)}
+										</div>
+									)}
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
 										<Input
@@ -780,31 +889,13 @@ export default function
 											</p>
 										)}
 									</div>
-									<div className='space-y-2'>
-											<Label htmlFor='securityDeposit'>Security Deposit *</Label>
-											<Input
-												id='securityDeposit'
-												value={formData.securityDeposit}
-												onChange={(e) =>
-													handleInputChange('securityDeposit', e.target.value)
-												}
-												placeholder='Enter security deposit'
-												className={errors.securityDeposit ? 'border-red-500' : ''}
-											/>
-											{errors.securityDeposit && (
-												<p className='text-red-500 text-xs mt-1'>
-													{errors.securityDeposit}
-												</p>
-											)}
-										</div>
-
 								</div>
 
 								{/* GST Section */}
-								{/* <div className='space-y-4 pt-2'>
+								<div className='space-y-4 pt-2'>
 									{formData?.tenantType === 'rent' && (
 										<>
-											<div className='flex items-center space-x-2'>
+											{formData.propertytype === 'residency' ? <></> :(<div className='flex items-center space-x-2'>
 												<Checkbox
 													id='gstCheckbox'
 													checked={formData.hasGst}
@@ -816,8 +907,8 @@ export default function
 														calculateTotalRent();
 													}}
 												/>
-												<Label htmlFor='gstCheckbox'>Include GST</Label>
-											</div>
+												{<Label htmlFor='gstCheckbox'>Include GST</Label>}
+											</div>)}
 
 											{formData.hasGst && (
 												<div className='grid grid-cols-3 gap-4'>
@@ -878,11 +969,11 @@ export default function
 											)}
 										</>
 									)}
-								</div> */}
+								</div>
 
 								{formData.tenantType === 'rent' && (
 									<>
-										{/* <div className='space-y-2'>
+										{formData.propertytype === 'residency' ? <></> :(<div className='space-y-2'>
 											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
 											<Input
 												id='subtotal'
@@ -890,9 +981,9 @@ export default function
 												placeholder='Calculated subtotal'
 												readOnly
 											/>
-										</div> */}
+										</div>)}
 										<div className='space-y-2'>
-											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance)</Label>
+											<Label htmlFor='totalmonthlyrent'>{formData.propertytype === 'residency' ? 'Total (Rent + Maintenance)' :'Total (Rent + Maintenance - TDS)'}</Label>
 											<Input
 												id='totalmonthlyrent'
 												value={formData.totalmonthlyrent}
@@ -1119,6 +1210,84 @@ export default function
 								</div>
 							</CardContent>
 						</Card>
+
+						{/* <Card>
+							<CardHeader className='bg-blue-50 rounded-t-lg'>
+								<CardTitle className='flex items-center gap-2 text-blue-700'>
+									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
+										5
+									</div>
+									Bank Details
+								</CardTitle>
+							</CardHeader>
+							<CardContent className='p-6 space-y-4'>
+								<div className='grid grid-cols-2 gap-4'>
+									<div className='space-y-2'>
+										<Label htmlFor='bankName'>Bank Name *</Label>
+										<Input
+											id='bankName'
+											value={formData.bankName}
+											onChange={(e) =>
+												handleInputChange('bankName', e.target.value)
+											}
+											placeholder='Enter Bank name'
+											className={errors.bankName ? 'border-red-500' : ''}
+										/>
+										{errors.bankName && (
+											<p className='text-red-500 text-xs mt-1'>
+												{errors.bankName}
+											</p>
+										)}
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='accountNumber'>Account Number *</Label>
+										<Input
+											id='accountNumber'
+											value={formData.accountNumber}
+											onChange={(e) =>
+												handleInputChange('accountNumber', e.target.value)
+											}
+											placeholder='Enter Account Number'
+											className={errors.accountNumber ? 'border-red-500' : ''}
+										/>
+										{errors.accountNumber && (
+											<p className='text-red-500 text-xs mt-1'>
+												{errors.accountNumber}
+											</p>
+										)}
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='branch'>Bank Branch</Label>
+										<Input
+											id='branch'
+											value={formData.branch}
+											onChange={(e) =>
+												handleInputChange('branch', e.target.value)
+											}
+											placeholder='Enter Branch name'
+										/>
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='ifscNumber'>IFSC Code *</Label>
+										<Input
+											id='ifscNumber'
+											value={formData.ifscNumber}
+											onChange={(e) =>
+												handleInputChange('ifscNumber', e.target.value)
+											}
+											placeholder='Enter IFSC code'
+											className={errors.ifscNumber ? 'border-red-500' : ''}
+										/>
+										{errors.ifscNumber && (
+											<p className='text-red-500 text-xs mt-1'>
+												{errors.ifscNumber}
+											</p>
+										)}
+									</div>
+								</div>
+							</CardContent> 
+						</Card> */}
+
 						<div className='flex justify-between gap-4 pt-4'>
 							<Button
 								type='button'

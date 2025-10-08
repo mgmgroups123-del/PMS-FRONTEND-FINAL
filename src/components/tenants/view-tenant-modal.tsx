@@ -147,8 +147,8 @@ export default function ViewTenantModal({
 								<div className='space-y-2'>
 									<Label>Property Type</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.unit?.propertyId?.property_type ||
-											"Land"}
+										{singleTenantData?.unit?.propertyId?.property_type || 
+										"Land"}
 									</div>
 								</div>
 								<div className='space-y-2'>
@@ -166,7 +166,7 @@ export default function ViewTenantModal({
 							</CardContent>
 						</Card>
 
-						<Card>
+						{/* <Card>
 							<CardHeader className='bg-blue-50 rounded-t-lg'>
 								<CardTitle className='flex items-center gap-2 text-blue-700'>
 									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
@@ -185,19 +185,20 @@ export default function ViewTenantModal({
 											: '0'}
 									</div>
 								</div>
-								<div className='space-y-2'>
-									<Label>Security Deposit</Label>
-									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										₹
-										{singleTenantData?.deposit
-											? Number.parseInt(
-												singleTenantData?.deposit
-											).toLocaleString()
-											: '0'}
+								{singleTenantData?.tenant_type === 'lease' && (
+									<div className='space-y-2'>
+										<Label>Security Deposit</Label>
+										<div className='p-2 bg-gray-50 rounded border text-sm'>
+											₹
+											{singleTenantData?.deposit
+												? Number.parseInt(
+														singleTenantData?.deposit
+												  ).toLocaleString()
+												: '0'}
+										</div>
 									</div>
-								</div>
-
-								{/* <div className='space-y-2'>
+								)}
+								<div className='space-y-2'>
 									<Label>Bank Name</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.bank_details?.bank_name}
@@ -220,9 +221,9 @@ export default function ViewTenantModal({
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.bank_details?.bank_IFSC}
 									</div>
-								</div> */}
+								</div>
 							</CardContent>
-						</Card>
+						</Card> */}
 
 						<Card>
 							<CardHeader className='bg-blue-50 rounded-t-lg'>

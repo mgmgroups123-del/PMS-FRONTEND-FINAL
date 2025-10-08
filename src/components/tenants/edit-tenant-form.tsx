@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '../../../src/components/ui/input';
 import { Label } from '../../../src/components/ui/label';
 import { Button } from '../../../src/components/ui/button';
+import { Checkbox } from '../../../src/components/ui/checkbox';
 import {
 	Card,
 	CardContent,
@@ -52,6 +53,10 @@ export default function EditTenantForm({
 		propertyInformation: '',
 		rent: '',
 		securityDeposit: '',
+		hasGst: true,
+		cgst: '9',
+		sgst: '9',
+		tds: '-10',
 		maintanance: '',
 		totalmonthlyrent: '',
 		teamSpecialized: '',
@@ -60,6 +65,10 @@ export default function EditTenantForm({
 		contactName: '',
 		contactPhone: '',
 		relationship: '',
+		bankName: '',
+		accountNumber: '',
+		branch: '',
+		ifscNumber: '',
 		rentDueDate: ''
 	});
 
@@ -82,11 +91,17 @@ export default function EditTenantForm({
 				propertyInformation: tenant?.unit?.unit_address || '',
 				rent: tenant?.financial_information?.rent || '',
 				securityDeposit: tenant?.deposit || '',
+				hasGst: true,
+				cgst: tenant?.financial_information?.cgst || '9',
+				sgst: tenant?.financial_information?.sgst || '9',
+				tds: tenant?.financial_information?.tds || '-10',
 				maintanance: tenant?.financial_information?.maintenance || '',
 				totalmonthlyrent: calculateInitialTotal(
 					tenant?.financial_information?.rent,
 					tenant?.financial_information?.maintenance,
-
+					tenant?.financial_information?.cgst,
+					tenant?.financial_information?.sgst,
+					tenant?.financial_information?.tds
 				),
 				teamSpecialized: '',
 				leaseStartDate: tenant?.lease_duration?.start_date
@@ -112,17 +127,24 @@ export default function EditTenantForm({
 		}
 	}, [tenant]);
 
-	console.log('formData', formData);	
-	console.log('Tenant', tenant);
-
 	const calculateInitialTotal = (
 		rent: string,
 		maintenance: string,
+		cgst: string,
+		sgst: string,
+		tds: string
 	) => {
 		const rentNum = parseFloat(rent) || 0;
 		const maintenanceNum = parseFloat(maintenance) || 0;
-
+		const cgstNum = parseFloat(cgst) || 0;
+		const sgstNum = parseFloat(sgst) || 0;
+		const tdsNum = parseFloat(tds) || 0;
 		let total = rentNum + maintenanceNum;
+		const cgstAmount = (rentNum * cgstNum) / 100;
+		const sgstAmount = (rentNum * sgstNum) / 100;
+		total += cgstAmount + sgstAmount;
+		const tdsAmount = (total * Math.abs(tdsNum)) / 100;
+		total -= tdsAmount;
 		return total.toFixed(2);
 	};
 
@@ -143,15 +165,31 @@ export default function EditTenantForm({
 	}, [
 		formData.rent,
 		formData.maintanance,
+		formData.cgst,
+		formData.sgst,
+		formData.tds,
 	]);
 
 	const calculateTotalRent = () => {
 		const rent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
+		const cgstPercentage = parseFloat(formData.cgst) || 0;
+		const sgstPercentage = parseFloat(formData.sgst) || 0;
+		const tdsPercentage = parseFloat(formData.tds) || 0;
 
 		let subtotal = 0;
 		let total = 0;
-		total = rent + maintenance;
+
+		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
+			const cgstAmount = (rent * cgstPercentage) / 100;
+			const sgstAmount = (rent * sgstPercentage) / 100;
+			const tdsAmount = (rent * Math.abs(tdsPercentage)) / 100;
+			
+			subtotal = rent + maintenance + cgstAmount + sgstAmount;
+			total = rent + maintenance - tdsAmount;
+		} else {
+			total = rent + maintenance;
+		}
 
 		setFormData((prev: any) => ({
 			...prev,
@@ -212,10 +250,22 @@ export default function EditTenantForm({
 				tenant_type: formData.tenantType,
 				unit: formData.unit,
 				rent: formData.totalmonthlyrent,
-				deposit: formData.securityDeposit,
+				deposit: formData.tenantType === 'lease' ? formData.securityDeposit : 0,
 				financial_information: {
 					rent: formData.rent,
+					...(formData.tenantType === 'rent' &&
+						formData.hasGst && {
+						cgst: formData.cgst,
+						sgst: formData.sgst,
+						tds: formData.tds,
+					}),
 					maintenance: formData.maintanance,
+				},
+				bank_details: {
+					bank_name: formData.bankName,
+					account_number: formData.accountNumber,
+					bank_branch: formData.branch,
+					bank_IFSC: formData.ifscNumber,
 				},
 			};
 			const response = await editTenants({
@@ -337,6 +387,7 @@ export default function EditTenantForm({
 												<SelectItem value='apartment'>Apartment</SelectItem>
 												<SelectItem value='house'>House</SelectItem>
 												<SelectItem value='land'>Land</SelectItem>
+												<SelectItem value='residency'>Residency</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
@@ -427,33 +478,106 @@ export default function EditTenantForm({
 											/>
 										</div>
 									)}
+									{formData.tenantType === 'lease' && (
+										<div className='space-y-2'>
+											<Label htmlFor='securityDeposit'>Security Deposit</Label>
+											<Input
+												id='securityDeposit'
+												value={formData.securityDeposit}
+												onChange={(e) =>
+													handleInputChange('securityDeposit', e.target.value)
+												}
+												placeholder='Enter security deposit'
+											/>
+										</div>
+									)}
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge</Label>
 										<Input
 											id='maintanance'
-											value={formData.maintanance || 0}
+											value={formData.maintanance}
 											onChange={(e) =>
 												handleInputChange('maintanance', e.target.value)
 											}
 											placeholder='Enter maintanance charge'
 										/>
 									</div>
-									<div className='space-y-2'>
-										<Label htmlFor='securityDeposit'>Security Deposit</Label>
-										<Input
-											id='securityDeposit'
-											value={formData.securityDeposit || 0}
-											onChange={(e) =>
-												handleInputChange('securityDeposit', e.target.value)
-											}
-											placeholder='Enter security deposit'
-										/>
-									</div>
+								</div>
+
+								{/* GST Section */}
+								<div className='space-y-4 pt-2'>
+									{formData?.tenantType === 'rent' && (
+										<>
+											<div className='flex items-center space-x-2'>
+												<Checkbox
+													id='gstCheckbox'
+													checked={formData.hasGst}
+													onCheckedChange={(checked: boolean) => {
+														setFormData((prev: any) => ({
+															...prev,
+															hasGst: checked,
+														}));
+														calculateTotalRent();
+													}}
+												/>
+												<Label htmlFor='gstCheckbox'>Include GST</Label>
+											</div>
+
+											{formData.hasGst && (
+												<div className='grid grid-cols-3 gap-4'>
+													<div className='space-y-2'>
+														<Label htmlFor='cgst'>CGST (%) *</Label>
+														<Input
+															id='cgst'
+															value={formData.cgst}
+															onChange={(e) =>
+																handleInputChange('cgst', e.target.value)
+															}
+															placeholder='Enter CGST percentage'
+															type='number'
+														/>
+													</div>
+													<div className='space-y-2'>
+														<Label htmlFor='sgst'>SGST (%) *</Label>
+														<Input
+															id='sgst'
+															value={formData.sgst}
+															onChange={(e) =>
+																handleInputChange('sgst', e.target.value)
+															}
+															placeholder='Enter SGST percentage'
+															type='number'
+														/>
+													</div>
+													<div className='space-y-2'>
+														<Label htmlFor='tds'>TDS *</Label>
+														<Input
+															id='tds'
+															value={formData.tds}
+															onChange={(e) =>
+																handleInputChange('tds', e.target.value)
+															}
+															placeholder='-10 %'
+														/>
+													</div>
+												</div>
+											)}
+										</>
+									)}
 								</div>
 								{formData.tenantType === 'rent' && (
 									<>
 										<div className='space-y-2'>
-											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance)</Label>
+											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
+											<Input
+												id='subtotal'
+												value={formData.subtotal || '0.00'}
+												placeholder='Calculated subtotal'
+												readOnly
+											/>
+										</div>
+										<div className='space-y-2'>
+											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance - TDS)</Label>
 											<Input
 												id='totalmonthlyrent'
 												value={formData.totalmonthlyrent}
@@ -511,7 +635,7 @@ export default function EditTenantForm({
 											type="number"
 											value={formData.rentDueDate}
 											onChange={(e: any) => {
-												const value: number = parseInt(e.target.value, 10);
+												const value:number = parseInt(e.target.value, 10);
 
 												// Only allow 1-31
 												if (value >= 1 && value <= 31) {
@@ -587,6 +711,66 @@ export default function EditTenantForm({
 								</div>
 							</CardContent>
 						</Card>
+
+						{/* <Card>
+							<CardHeader className='bg-blue-50 rounded-t-lg'>
+								<CardTitle className='flex items-center gap-2 text-blue-700'>
+									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
+										5
+									</div>
+									Bank Details
+								</CardTitle>
+							</CardHeader>
+							<CardContent className='p-6 space-y-4'>
+								<div className='grid grid-cols-2 gap-4'>
+									<div className='space-y-2'>
+										<Label htmlFor='bankName'>Bank Name</Label>
+										<Input
+											id='bankName'
+											value={formData.bankName}
+											onChange={(e) =>
+												handleInputChange('bankName', e.target.value)
+											}
+											placeholder='Enter Bank name'
+										/>
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='accountNumber'>Account Number</Label>
+										<Input
+											id='accountNumber'
+											value={formData.accountNumber}
+											onChange={(e) =>
+												handleInputChange('accountNumber', e.target.value)
+											}
+											placeholder='Enter Account Number'
+										/>
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='branch'>Bank Branch</Label>
+										<Input
+											id='branch'
+											value={formData.branch}
+											onChange={(e) =>
+												handleInputChange('branch', e.target.value)
+											}
+											placeholder='Enter Branch name'
+										/>
+									</div>
+									<div className='space-y-2'>
+										<Label htmlFor='ifscNumber'>IFSC Code</Label>
+										<Input
+											id='ifscNumber'
+											value={formData.ifscNumber}
+											onChange={(e) =>
+												handleInputChange('ifscNumber', e.target.value)
+											}
+											placeholder='Enter IFSC code'
+										/>
+									</div>
+								</div>
+							</CardContent>
+						</Card> */}
+
 						<div className='flex justify-between gap-4 pt-4'>
 							<Button
 								type='button'

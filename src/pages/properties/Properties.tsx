@@ -897,6 +897,12 @@ function Properties() {
                         >
                           House
                         </SelectItem>
+                        <SelectItem
+                          value="residency"
+                          className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
+                        >
+                          Residency
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.propertyType && (
