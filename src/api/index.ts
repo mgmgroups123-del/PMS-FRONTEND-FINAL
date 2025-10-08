@@ -21,6 +21,8 @@ class Client {
 	property = {
 		getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.property.getAll, params),
+		report: (params: string) =>
+			HttpClient.get(HTTP_END_POINTS.property.report, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.property.create, params),
 		edit: (params: any, data: any) =>
@@ -31,6 +33,8 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.property.get + params.uuid),
 		getProperty: (data: any) =>
 			HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
+		download: (data: any) =>
+			HttpClient.fileGet(HTTP_END_POINTS.property.getDownload, data),
 	};
 	land = {
 		getAll: (params: string) =>

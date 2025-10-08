@@ -525,6 +525,7 @@ const Rent: React.FC = () => {
             <tr>
               <th className="px-6 py-4 rounded-l-lg">Company Name</th>
               <th className="px-6 py-4">Amount</th>
+              <th className="px-6 py-4">Deposit</th>
               <th className="px-6 py-4">Due Date</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 rounded-r-lg">Actions</th>
@@ -557,6 +558,10 @@ const Rent: React.FC = () => {
                     ₹{item.tenantId?.rent || "0"}
                   </td>
 
+                  <td className="px-6 py-4 border-t border-b border-gray-200">
+                    ₹{item.tenantId?.deposit || "0"}
+                  </td>
+
                   <td className="px-6 py-4  border-t border-b border-gray-200">
 
                     <span> {formatDate(item.paymentDueDay)}</span>
@@ -570,9 +575,6 @@ const Rent: React.FC = () => {
                           badgeRef.current = el;
                       }}
                       onClick={(e) => {
-                        if (item.status === 'paid') {
-                          return;
-                        }
                         badgeRef.current = e.currentTarget as HTMLDivElement;
                         setOpenDropdownId((prev) =>
                           prev === item.uuid ? null : item.uuid
@@ -585,8 +587,6 @@ const Rent: React.FC = () => {
                       <span className="flex items-center gap-2 truncate">
                         <span>{item.status}</span>
                       </span>
-
-                      {item.status !== 'paid' && (
                         <svg
                           className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
                             `}
@@ -601,7 +601,7 @@ const Rent: React.FC = () => {
                             d="M19 9l-7 7-7-7"
                           />
                         </svg>
-                      )}
+                    
                     </div>
 
                     {openDropdownId === item.uuid && (

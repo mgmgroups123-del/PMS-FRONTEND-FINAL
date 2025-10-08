@@ -5,17 +5,25 @@ import { ChevronDown } from "lucide-react";
 import { FONTS } from "../../constants/ui constants";
 import ExpenseBreakdown from "./ExpenseChart";
 import graphBuilding from "../../assets/Reports/graphBuilding.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Purple_Building from "../../assets/Reports/purple_building.png";
 import Frame_1 from "../../assets/image 315.png";
 import { useSelector } from "react-redux";
 import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector";
-import { selectProperties } from "../../features/Properties/Reducers/Selectors";
+import { getAllPropertiesReport } from "../../features/Properties/Services";
 
 const FinancialReport = () => {
   const ReportsData = useSelector(selectDashboardData);
-  const properties = useSelector(selectProperties);
+  const [properties, setProperties] = useState([])
   const { rentCollectionGraph }: any = ReportsData || {};
+
+  useEffect(()=> {
+    const response = async() => {
+      const res = await getAllPropertiesReport();
+      setProperties(res?.data || [])
+    }
+    response();
+  },[])
 
   const revenueData = [
     {
@@ -109,6 +117,8 @@ const FinancialReport = () => {
     if (num >= 1000) return `₹ ${(num / 1000).toFixed(1)} K`;
     return `₹ ${num}`;
   };
+
+  console.log("Properties Data:", properties);
 
   return (
     <div>
@@ -275,20 +285,20 @@ const FinancialReport = () => {
           <p>Property</p>
           <p>Units</p>
           <p>Revenue</p>
-          <p>Occupancy</p>
+          <p>Occupancy</p>  
         </div>
 
-        {properties.map((data: any, index: any) => (
+        {properties?.map((data: any, index: any) => (
           <div
             key={index}
             className="shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4"
           >
-            <p style={{ ...FONTS.Table_Header }}>{data?.property_name}</p>
+            <p style={{ ...FONTS.Table_Header }}>{data?.name}</p>
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
               {data?.total_units}
             </p>
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
-               {formatIndianNumber(data?.property_revenue)}
+               {formatIndianNumber(data?.revenue)}
             </p>
             <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
               {data?.occupancy_rate} %

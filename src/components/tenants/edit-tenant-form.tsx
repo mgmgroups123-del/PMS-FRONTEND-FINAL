@@ -180,7 +180,7 @@ export default function EditTenantForm({
 		let subtotal = 0;
 		let total = 0;
 
-		if (formData.tenantType === 'rent') {
+		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
 			const cgstAmount = (rent * cgstPercentage) / 100;
 			const sgstAmount = (rent * sgstPercentage) / 100;
 			const tdsAmount = (rent * Math.abs(tdsPercentage)) / 100;
@@ -387,6 +387,7 @@ export default function EditTenantForm({
 												<SelectItem value='apartment'>Apartment</SelectItem>
 												<SelectItem value='house'>House</SelectItem>
 												<SelectItem value='land'>Land</SelectItem>
+												<SelectItem value='residency'>Residency</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
@@ -711,7 +712,7 @@ export default function EditTenantForm({
 							</CardContent>
 						</Card>
 
-						<Card>
+						{/* <Card>
 							<CardHeader className='bg-blue-50 rounded-t-lg'>
 								<CardTitle className='flex items-center gap-2 text-blue-700'>
 									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
@@ -768,7 +769,7 @@ export default function EditTenantForm({
 									</div>
 								</div>
 							</CardContent>
-						</Card>
+						</Card> */}
 
 						<div className='flex justify-between gap-4 pt-4'>
 							<Button

@@ -202,18 +202,18 @@ export default function
 				else if (!/^[0-9]{10}$/.test(value))
 					error = 'Phone number must be 10 digits';
 				break;
-			case 'bankName':
-				if (!value.trim()) error = 'Bank name is required';
-				break;
-			case 'accountNumber':
-				if (!value.trim()) error = 'Account number is required';
-				else if (!/^[0-9]{9,18}$/.test(value)) error = 'Invalid account number';
-				break;
-			case 'ifscNumber':
-				if (!value.trim()) error = 'IFSC code is required';
-				else if (!/^[A-Za-z]{4}0[A-Z0-9a-z]{6}$/.test(value))
-					error = 'Invalid IFSC format';
-				break;
+			// case 'bankName':
+			// 	if (!value.trim()) error = 'Bank name is required';
+			// 	break;
+			// case 'accountNumber':
+			// 	if (!value.trim()) error = 'Account number is required';
+			// 	else if (!/^[0-9]{9,18}$/.test(value)) error = 'Invalid account number';
+			// 	break;
+			// case 'ifscNumber':
+			// 	if (!value.trim()) error = 'IFSC code is required';
+			// 	else if (!/^[A-Za-z]{4}0[A-Z0-9a-z]{6}$/.test(value))
+			// 		error = 'Invalid IFSC format';
+			// 	break;
 			default:
 				break;
 		}
@@ -279,7 +279,7 @@ export default function
 		let subtotal = 0;
 		let total = 0;
 
-		if (formData.tenantType === 'rent') {
+		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
 			const subtotalBeforeGST = basicRent + maintenance;
 			const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
 			const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
@@ -289,6 +289,8 @@ export default function
 			total = subtotalBeforeGST - tds;
 		} else if (formData.tenantType === 'lease') {
 			total = maintenance + deposit;
+		}else if (formData.propertytype === 'residency') {
+			total = basicRent + maintenance;
 		}
 
 		setFormData((prev) => ({
@@ -408,12 +410,12 @@ export default function
 					}),
 					maintenance: formData.maintanance,
 				},
-				bank_details: {
-					bank_name: formData.bankName,
-					account_number: formData.accountNumber,
-					bank_branch: formData.branch,
-					bank_IFSC: formData.ifscNumber,
-				},
+				// bank_details: {
+				// 	bank_name: formData.bankName,
+				// 	account_number: formData.accountNumber,
+				// 	bank_branch: formData.branch,
+				// 	bank_IFSC: formData.ifscNumber,
+				// },
 			};
 
 			const response = await createTenants(payload);
@@ -627,6 +629,7 @@ export default function
 													{ value: 'apartment', label: 'Apartment' },
 													{ value: 'house', label: 'House' },
 													{ value: 'land', label: 'Land' },
+													{ value: 'residency', label: 'Residency' },
 												].map((item) => (
 													<SelectItem
 														key={item.value}
@@ -892,7 +895,7 @@ export default function
 								<div className='space-y-4 pt-2'>
 									{formData?.tenantType === 'rent' && (
 										<>
-											<div className='flex items-center space-x-2'>
+											{formData.propertytype === 'residency' ? <></> :(<div className='flex items-center space-x-2'>
 												<Checkbox
 													id='gstCheckbox'
 													checked={formData.hasGst}
@@ -904,8 +907,8 @@ export default function
 														calculateTotalRent();
 													}}
 												/>
-												<Label htmlFor='gstCheckbox'>Include GST</Label>
-											</div>
+												{<Label htmlFor='gstCheckbox'>Include GST</Label>}
+											</div>)}
 
 											{formData.hasGst && (
 												<div className='grid grid-cols-3 gap-4'>
@@ -970,7 +973,7 @@ export default function
 
 								{formData.tenantType === 'rent' && (
 									<>
-										<div className='space-y-2'>
+										{formData.propertytype === 'residency' ? <></> :(<div className='space-y-2'>
 											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
 											<Input
 												id='subtotal'
@@ -978,9 +981,9 @@ export default function
 												placeholder='Calculated subtotal'
 												readOnly
 											/>
-										</div>
+										</div>)}
 										<div className='space-y-2'>
-											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance - TDS)</Label>
+											<Label htmlFor='totalmonthlyrent'>{formData.propertytype === 'residency' ? 'Total (Rent + Maintenance)' :'Total (Rent + Maintenance - TDS)'}</Label>
 											<Input
 												id='totalmonthlyrent'
 												value={formData.totalmonthlyrent}
@@ -1208,7 +1211,7 @@ export default function
 							</CardContent>
 						</Card>
 
-						<Card>
+						{/* <Card>
 							<CardHeader className='bg-blue-50 rounded-t-lg'>
 								<CardTitle className='flex items-center gap-2 text-blue-700'>
 									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
@@ -1282,8 +1285,8 @@ export default function
 										)}
 									</div>
 								</div>
-							</CardContent>
-						</Card>
+							</CardContent> 
+						</Card> */}
 
 						<div className='flex justify-between gap-4 pt-4'>
 							<Button

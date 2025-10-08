@@ -198,7 +198,7 @@ export default function ViewTenantModal({
 										</div>
 									</div>
 								)}
-								<div className='space-y-2'>
+								{/* <div className='space-y-2'>
 									<Label>Bank Name</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.bank_details?.bank_name}
@@ -221,7 +221,7 @@ export default function ViewTenantModal({
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.bank_details?.bank_IFSC}
 									</div>
-								</div>
+								</div> */}
 							</CardContent>
 						</Card>
 

@@ -14,7 +14,9 @@ const generateEndPoints = () => {
             get: "/api/property/",
             update: "/api/property/",
             delete: "/api/property/",
-            getProperty: "/api/property/get"
+            getProperty: "/api/property/get",
+            report:"/api/property/report/all",
+            getDownload:"/api/property/report/download/"
         },
         unit: {
             create: "/api/unit/create",
@@ -63,7 +65,7 @@ const generateEndPoints = () => {
         DashBoard: {
             get: "/api/dashboard/report",
             getocc:"/api/dashboard/occupancy/report",
-            global: '/api/dashboard/get-global-search'
+            global: '/api/dashboard/get-global-search',
         },
         Notification:{
             getAll:"/api/notification/",

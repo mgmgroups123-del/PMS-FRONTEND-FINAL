@@ -97,3 +97,14 @@ export const deleteUnit = async (uuid: string) => {
     throw error;
   }
 }
+
+export const getAllPropertiesReport = async (params?: any) => {
+    try {
+      const res = await Client.property.report(params)
+      console.log("data Service:", res)
+      return res
+    } catch (error) {
+      console.log("Error", error)
+      throw error
+    }
+  }
