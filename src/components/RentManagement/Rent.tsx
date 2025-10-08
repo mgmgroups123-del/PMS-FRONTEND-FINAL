@@ -533,7 +533,7 @@ const Rent: React.FC = () => {
           </thead>
           <tbody style={{ ...FONTS.Table_Body }}>
             {paginatedData.length > 0 ? (
-              paginatedData.map((item: RentItem) => (
+              paginatedData?.map((item: RentItem) => (
                 <tr
                   key={item.uuid}
                   className="shadow-sm text-[#7D7D7D] hover:shadow-md transition-shadow"
@@ -550,7 +550,7 @@ const Rent: React.FC = () => {
                       <span className="font-bold text-black">
                         {item.tenantId?.personal_information?.full_name || "N/A"}
                       </span>
-                      <span className="text-sm">{item.tenantId?.unit.unit_name || "N/A"}</span>
+                      <span className="text-sm">{item?.tenantId?.unit?.unit_name || "N/A"}</span>
                     </div>
                   </td>
 
