@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Building2, ChevronLeft, ChevronRight, X, } from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight, X, Edit, Save } from "lucide-react";
 import Card2 from "./Card";
 // import frame2 from "../../assets/cardimg1.png";
 // import frame3 from "../../assets/image 315.png";
@@ -14,6 +14,7 @@ import { Input } from "../ui/input";
 import searchImg from '../../assets/properties/search.png';
 import { GetLocalStorage } from "../../utils/localstorage";
 import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
+import { editTenants, patchTenants } from "../../features/tenants/services";
 
 interface PersonalInformation {
   full_name: string;
@@ -33,7 +34,8 @@ interface Tenant {
   lease_start_date: string;
   lease_end_date: string;
   emergency_contact: string;
-  financial_information: any
+  financial_information: any;
+  uuid: string
 }
 
 interface RentItem {
@@ -42,6 +44,12 @@ interface RentItem {
   paymentDueDay: string;
   status: string;
   bankDetails: string;
+}
+
+interface EditableRentData {
+  full_name: string;
+  rent: string;
+  maintenance: string;
 }
 
 const Rent: React.FC = () => {
@@ -59,6 +67,13 @@ const Rent: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState<EditableRentData>({
+    full_name: "",
+    rent: "",
+    maintenance: ""
+  });
+  const [isSaving, setIsSaving] = useState(false);
   const today = new Date();
 
   const months = [
@@ -82,10 +97,8 @@ const Rent: React.FC = () => {
 
   const [monthFilter, setMonthFilter] = useState(currentMonthName);
 
-
   const badgeRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-
 
   const statusOptions = ["paid", "pending", "overdue"];
   const filterStatusOptions = ["All Status", "paid", "pending", "overdue"];
@@ -133,7 +146,6 @@ const Rent: React.FC = () => {
   const dispatch = useDispatch<any>();
   const rents = useSelector(getRent);
 
-
   useEffect(() => {
     const fetchRentData = async () => {
       try {
@@ -155,7 +167,6 @@ const Rent: React.FC = () => {
 
     fetchRentData();
   }, [dispatch]);
-
 
   const handleDownload = async (uuid: string) => {
     try {
@@ -184,7 +195,6 @@ const Rent: React.FC = () => {
     }
   };
 
-
   const handleStatusChange = async (uuid: string, newStatus: string) => {
     try {
       setUpdatingId(uuid);
@@ -212,8 +222,6 @@ const Rent: React.FC = () => {
     }
     setOpenDropdownId(null);
   };
-
-
 
   const handleDelete = async () => {
     if (!deletingId) return;
@@ -259,6 +267,71 @@ const Rent: React.FC = () => {
     }
   };
 
+  // Initialize editable data when modal opens
+  useEffect(() => {
+    if (selectedRent && isModalOpen) {
+      setEditableData({
+        full_name: selectedRent.tenantId?.personal_information?.full_name || "",
+        rent: selectedRent.tenantId?.financial_information?.rent || "",
+        maintenance: selectedRent.tenantId?.financial_information?.maintenance || "0"
+      });
+    }
+  }, [selectedRent, isModalOpen]);
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // If canceling edit, reset to original values
+      setEditableData({
+        full_name: selectedRent?.tenantId?.personal_information?.full_name || "",
+        rent: selectedRent?.tenantId?.rent || "",
+        maintenance: selectedRent?.tenantId?.financial_information?.maintenance || "0"
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedRent) return;
+
+    try {
+      setIsSaving(true);
+      const data = {
+        uuid: selectedRent.tenantId.uuid,
+        data:{
+        personal_information:{full_name: editableData.full_name},
+        financial_information:{rent: Number(editableData.rent),maintenance: Number(editableData.maintenance)},
+        rent: Number(editableData.rent) + Number(editableData.maintenance)
+        }
+      };
+
+      const response = await patchTenants(data);
+      if(response.success){
+      toast.success('Changes saved successfully!');
+      setIsEditing(false);
+      }
+      
+      // Refresh the data
+      const fetchParams = {
+        month: (today.getMonth() + 1).toString(),
+        year: today.getFullYear().toString(),
+      };
+      await dispatch(fetchRentThunk(fetchParams));
+      
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+      toast.error('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof EditableRentData, value: string) => {
+    setEditableData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const filteredData = useMemo(() => {
     if (!rents?.rents) return [];
     return rents.rents.filter((item: RentItem) => {
@@ -277,7 +350,6 @@ const Rent: React.FC = () => {
       return matchesSearch && matchesStatus && matchesMonth;
     });
   }, [searchTerm, statusFilter, monthFilter, rents?.rents]);
-
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -310,7 +382,6 @@ const Rent: React.FC = () => {
     ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
 
   const totalDeposits = rents?.TotalDeposit?.[0]?.total || 0;
-
 
   const resetSearch = () => {
     setSearchTerm('');
@@ -513,8 +584,6 @@ const Rent: React.FC = () => {
                 </div>
               ))}
             </div>
-
-
           )}
         </div>
       </div>
@@ -563,9 +632,7 @@ const Rent: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4  border-t border-b border-gray-200">
-
                     <span> {formatDate(item.paymentDueDay)}</span>
-
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200 relative">
@@ -587,21 +654,20 @@ const Rent: React.FC = () => {
                       <span className="flex items-center gap-2 truncate">
                         <span>{item.status}</span>
                       </span>
-                        <svg
-                          className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
+                      <svg
+                        className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
                             `}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                    
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
                     </div>
 
                     {openDropdownId === item.uuid && (
@@ -637,6 +703,7 @@ const Rent: React.FC = () => {
                         onClick={() => {
                           setSelectedRent(item);
                           setIsModalOpen(true);
+                          setIsEditing(false);
                         }}
                       >
                         View
@@ -769,7 +836,6 @@ const Rent: React.FC = () => {
         </div>
       )}
 
-
       {isModalOpen && selectedRent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -778,14 +844,37 @@ const Rent: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Rent Payment Details</h2>
                 <p className="text-[#7D7D7D] mt-1">{formatDate(selectedRent.paymentDueDay) || "N/A"}</p>
               </div>
-              <button
-                className="text-gray-400  bg-gray-500 w-6 h-6 hover:bg-gray-700 rounded-full transition-colors p-1 -mr-2"
-                onClick={() => setIsModalOpen(false)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 text-white w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2">
+                {!isEditing ? (
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={handleEditToggle}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                ) : (
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
+                )}
+                <button
+                  className="text-gray-400 bg-gray-500 w-6 h-6 hover:bg-gray-700 rounded-full transition-colors p-1"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsEditing(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 text-white w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-8">
@@ -793,36 +882,51 @@ const Rent: React.FC = () => {
                 <div className={`rounded-xl p-4 ${getStatusStyle(selectedRent.status)}`}>
                   <BiSolidBuildings className="text-4xl text-white" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {selectedRent.tenantId?.personal_information?.full_name || "N/A"}
-                  </h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      {selectedRent.tenantId?.unit.unit_name || "N/A"}
-                    </span>
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                      {selectedRent.tenantId?.personal_information?.email || "N/A"}
-                    </span>
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                      </svg>
-                      {selectedRent.tenantId?.personal_information?.phone || "N/A"}
-                    </span>
-                  </div>
+                <div className="flex-1">
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Tenant Name
+                        </label>
+                        <Input
+                          value={editableData.full_name}
+                          onChange={(e) => handleInputChange('full_name', e.target.value)}
+                          className="w-full"
+                          placeholder="Enter tenant name"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {editableData.full_name || "N/A"}
+                      </h3>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                        <span className="flex items-center text-[#7D7D7D]">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          {selectedRent.tenantId?.unit.unit_name || "N/A"}
+                        </span>
+                        <span className="flex items-center text-[#7D7D7D]">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          {selectedRent.tenantId?.personal_information?.email || "N/A"}
+                        </span>
+                        <span className="flex items-center text-[#7D7D7D]">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                          </svg>
+                          {selectedRent.tenantId?.personal_information?.phone || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-
-
-
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -863,13 +967,8 @@ const Rent: React.FC = () => {
                         <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusStyle(selectedRent.status)}`}></span>
                         <span className="font-medium capitalize">{selectedRent.status || "N/A"}</span>
                       </div>
-                      {/* <div>
-                        <span className="text-sm text-[#7D7D7D]">Security Deposit:</span>
-                        <span className="ml-2 font-medium">₹{selectedRent.tenantId?.deposit || "0"}</span>
-                      </div> */}
                     </div>
                   </div>
-
                 </div>
 
                 <div className="space-y-6">
@@ -882,15 +981,35 @@ const Rent: React.FC = () => {
                       Rent Details
                     </h4>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-[#7D7D7D]">Base Rent</span>
-                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.rent || "0"}</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.rent}
+                            onChange={(e) => handleInputChange('rent', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="font-medium">₹{editableData.rent || "0"}</span>
+                        )}
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-[#7D7D7D]">Maintenance</span>
-                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.maintenance || "0"}</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.maintenance}
+                            onChange={(e) => handleInputChange('maintenance', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="font-medium">₹{editableData.maintenance || "0"}</span>
+                        )}
                       </div>
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">CGST</span>
                         <span className="font-medium">{selectedRent.tenantId?.financial_information?.cgst || "9"} %</span>
                       </div>
@@ -901,22 +1020,33 @@ const Rent: React.FC = () => {
                       <div className="flex justify-between pt-2 border-t border-gray-200">
                         <span className="text-[#7D7D7D]">TDS Deduction</span>
                         <span className="text-red-500 font-medium">{selectedRent.tenantId?.financial_information?.tds || "-10"} %</span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between pt-3 border-t border-gray-200">
                         <span className="font-semibold">Total Amount</span>
-                        <span className="font-bold text-lg">₹{selectedRent.tenantId?.rent || "0"}</span>
+                        <span className="font-bold text-lg">₹{Number(editableData.rent) + Number(editableData.maintenance) || "0"}</span>
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
 
             <div className="sticky bottom-0 bg-white border-t p-4 flex justify-end space-x-3">
+              {isEditing && (
+                <button
+                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={handleEditToggle}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+              )}
               <button
-                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-300 transition-colors"
-                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setIsEditing(false);
+                }}
               >
                 Close
               </button>
@@ -936,8 +1066,6 @@ const Rent: React.FC = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

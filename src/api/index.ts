@@ -70,6 +70,11 @@ class Client {
 				HTTP_END_POINTS.tenant.get.replace(':uuid', params.uuid),
 				params
 			),
+		patchUpdate: (data: any) =>
+			HttpClient.patch(
+				HTTP_END_POINTS.tenant.update.replace(':uuid', data?.uuid),
+				data?.data
+			),
 	};
 	unit = {
 		getAll: (params: string) =>
@@ -88,7 +93,7 @@ class Client {
 	rent = {
 		getAll: (params: any) =>
 			HttpClient.get(HTTP_END_POINTS.rent.getAll, params),
-		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.get, params),
+		getByid: (params: string) => HttpClient.post(HTTP_END_POINTS.rent.get, params),
 		update: (params: any) => HttpClient.update(HTTP_END_POINTS.rent.update+ params.uuid, params),
 		download: (uuid: string) => HttpClient.fileGet(HTTP_END_POINTS.rent.download+ uuid),
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.rent.delete+ params),

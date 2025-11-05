@@ -169,17 +169,17 @@ export default function
 				else if (isNaN(Number(value))) error = 'Maintenance must be a number';
 				else if (Number(value) < 0) error = 'Maintenance cannot be negative';
 				break;
-			case 'cgst':
-			case 'sgst':
-				if (formData.hasGst && !value.trim())
-					error = 'This field is required when GST is enabled';
-				else if (isNaN(Number(value))) error = 'Must be a number';
-				else if (Number(value) < 0) error = 'Cannot be negative';
-				break;
-			case 'tds':
-				if (!value.trim()) error = 'TDS is required';
-				else if (isNaN(Number(value))) error = 'TDS must be a number';
-				break;
+			// case 'cgst':
+			// case 'sgst':
+			// 	if (formData.hasGst && !value.trim())
+			// 		error = 'This field is required when GST is enabled';
+			// 	else if (isNaN(Number(value))) error = 'Must be a number';
+			// 	else if (Number(value) < 0) error = 'Cannot be negative';
+			// 	break;
+			// case 'tds':
+			// 	if (!value.trim()) error = 'TDS is required';
+			// 	else if (isNaN(Number(value))) error = 'TDS must be a number';
+			// 	break;
 			case 'leaseStartDate':
 			case 'leaseEndDate':
 				if (!value.trim()) error = 'This field is required';
@@ -271,9 +271,9 @@ export default function
 	const calculateTotalRent = () => {
 		const basicRent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
-		const cgstPercentage = parseFloat(formData.cgst) || 0;
-		const sgstPercentage = parseFloat(formData.sgst) || 0;
-		const tdsPercentage = parseFloat(formData.tds) || 0;
+		// const cgstPercentage = parseFloat(formData.cgst) || 0;
+		// const sgstPercentage = parseFloat(formData.sgst) || 0;
+		// const tdsPercentage = parseFloat(formData.tds) || 0;
 		const deposit = parseFloat(formData.securityDeposit) || 0;
 
 		let subtotal = 0;
@@ -281,15 +281,15 @@ export default function
 
 		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
 			const subtotalBeforeGST = basicRent + maintenance;
-			const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
-			const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
-			const tds = (subtotalBeforeGST * Math.abs(tdsPercentage)) / 100;
-			
-			subtotal = subtotalBeforeGST + cgst + sgst;
-			total = subtotalBeforeGST - tds;
+			// const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
+			// const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
+			// const tds = (subtotalBeforeGST * Math.abs(tdsPercentage)) / 100;
+
+			// subtotal = subtotalBeforeGST + cgst + sgst;
+			total = subtotalBeforeGST;
 		} else if (formData.tenantType === 'lease') {
 			total = maintenance + deposit;
-		}else if (formData.propertytype === 'residency') {
+		} else if (formData.propertytype === 'residency') {
 			total = basicRent + maintenance;
 		}
 
@@ -398,6 +398,7 @@ export default function
 				unit: selectedProperty === "land" ? landId : formData.unit,
 				rent: formData.totalmonthlyrent,
 				deposit: formData.securityDeposit,
+				hasGST: formData.hasGst,
 				is_active: true,
 				is_deleted: false,
 				financial_information: {
@@ -853,25 +854,25 @@ export default function
 											)}
 										</div>
 									)}
-									
-										<div className='space-y-2'>
-											<Label htmlFor='securityDeposit'>Security Deposit *</Label>
-											<Input
-												id='securityDeposit'
-												value={formData.securityDeposit}
-												onChange={(e) =>
-													handleInputChange('securityDeposit', e.target.value)
-												}
-												placeholder='Enter security deposit'
-												className={errors.securityDeposit ? 'border-red-500' : ''}
-											/>
-											{errors.securityDeposit && (
-												<p className='text-red-500 text-xs mt-1'>
-													{errors.securityDeposit}
-												</p>
-											)}
-										</div>
-								
+
+									<div className='space-y-2'>
+										<Label htmlFor='securityDeposit'>Security Deposit *</Label>
+										<Input
+											id='securityDeposit'
+											value={formData.securityDeposit}
+											onChange={(e) =>
+												handleInputChange('securityDeposit', e.target.value)
+											}
+											placeholder='Enter security deposit'
+											className={errors.securityDeposit ? 'border-red-500' : ''}
+										/>
+										{errors.securityDeposit && (
+											<p className='text-red-500 text-xs mt-1'>
+												{errors.securityDeposit}
+											</p>
+										)}
+									</div>
+
 									<div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
 										<Input
@@ -895,7 +896,7 @@ export default function
 								<div className='space-y-4 pt-2'>
 									{formData?.tenantType === 'rent' && (
 										<>
-											{formData.propertytype === 'residency' ? <></> :(<div className='flex items-center space-x-2'>
+											{formData.propertytype === 'residency' ? <></> : (<div className='flex items-center space-x-2'>
 												<Checkbox
 													id='gstCheckbox'
 													checked={formData.hasGst}
@@ -910,7 +911,7 @@ export default function
 												{<Label htmlFor='gstCheckbox'>Include GST</Label>}
 											</div>)}
 
-											{formData.hasGst && (
+											{/* {formData.hasGst && (
 												<div className='grid grid-cols-3 gap-4'>
 													<div className='space-y-2'>
 														<Label htmlFor='cgst'>CGST (%) *</Label>
@@ -966,24 +967,26 @@ export default function
 														)}
 													</div>
 												</div>
-											)}
+											)} */}
 										</>
 									)}
 								</div>
 
 								{formData.tenantType === 'rent' && (
 									<>
-										{formData.propertytype === 'residency' ? <></> :(<div className='space-y-2'>
-											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
-											<Input
-												id='subtotal'
-												value={formData.subtotal || '0.00'}
-												placeholder='Calculated subtotal'
-												readOnly
-											/>
-										</div>)}
+										{formData.propertytype === 'residency' ? <></> : (
+											<div className='space-y-2'>
+												{/* <Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
+												<Input
+													id='subtotal'
+													value={formData.subtotal || '0.00'}
+													placeholder='Calculated subtotal'
+													readOnly
+												/> */}
+											</div>
+										)}
 										<div className='space-y-2'>
-											<Label htmlFor='totalmonthlyrent'>{formData.propertytype === 'residency' ? 'Total (Rent + Maintenance)' :'Total (Rent + Maintenance - TDS)'}</Label>
+											<Label htmlFor='totalmonthlyrent'>{formData.propertytype === 'residency' ? 'Total ' : 'Total'}</Label>
 											<Input
 												id='totalmonthlyrent'
 												value={formData.totalmonthlyrent}
