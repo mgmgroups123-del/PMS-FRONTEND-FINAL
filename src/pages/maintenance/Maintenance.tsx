@@ -312,7 +312,7 @@ const Maintenance = () => {
             className={`flex items-center gap-2 bg-red-700 hover:bg-[#ed3237]  text-white px-4 py-2 rounded-lg shadow ${role === 'admin' ? `bg-red-700 opacity-50 cursor-not-allowed` : ``}`}
           >
             <FaPlus/>
-            <span>New Maitenance</span>
+            <span>New Maintenance</span>
           </Button>
         </div>  
       </div>

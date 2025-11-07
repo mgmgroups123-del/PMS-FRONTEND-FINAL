@@ -3,7 +3,6 @@ import Client from '../../api/index'
 export const getRentAll = async (params: any) => {
   try {
     const response = await Client.rent.getAll(params);
-    console.log("Backend FAQ data:", response);
     return response;
   } catch (error: any) {
     throw new Error(error.message);
@@ -12,10 +11,9 @@ export const getRentAll = async (params: any) => {
 
 
 
-export const downloadRent = async (uuid: string) => {
+export const downloadRent = async (uuid: any) => {
   try {
     const response = await Client.rent.download(uuid);
-    console.log("Backend FAQ data:", response);
     return response;
   } catch (error: any) {
     throw new Error(error.message);
@@ -26,7 +24,6 @@ export const downloadRent = async (uuid: string) => {
 export const updateRent = async (params: any) => {
   try {
     const response = await Client.rent.update(params);
-    console.log("Backend FAQ data:", response);
     return response;
   } catch (error: any) {
     throw new Error(error.message);

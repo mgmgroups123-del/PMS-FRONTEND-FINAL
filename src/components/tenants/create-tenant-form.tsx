@@ -92,9 +92,9 @@ export default function
 		rent: '',
 		securityDeposit: '',
 		hasGst: false,
-		cgst: '9',
-		sgst: '9',
-		tds: '-10',
+		cgst: '',
+		sgst: '',
+		tds: '',
 		maintanance: '',
 		totalmonthlyrent: '',
 		teamSpecialized: '',
@@ -164,11 +164,11 @@ export default function
 				else if (value.trim() && Number(value) < 0)
 					error = 'Security deposit cannot be negative';
 				break;
-			case 'maintanance':
-				if (!value.trim()) error = 'Maintenance charge is required';
-				else if (isNaN(Number(value))) error = 'Maintenance must be a number';
-				else if (Number(value) < 0) error = 'Maintenance cannot be negative';
-				break;
+			// case 'maintanance':
+			// 	if (!value.trim()) error = 'Maintenance charge is required';
+			// 	else if (isNaN(Number(value))) error = 'Maintenance must be a number';
+			// 	else if (Number(value) < 0) error = 'Maintenance cannot be negative';
+			// 	break;
 			// case 'cgst':
 			// case 'sgst':
 			// 	if (formData.hasGst && !value.trim())
@@ -834,10 +834,10 @@ export default function
 								</CardTitle>
 							</CardHeader>
 							<CardContent className='p-6 space-y-4'>
-								<div className='grid grid-cols-3 gap-4'>
+								<div className='grid grid-cols-1 gap-4'>
 									{formData.tenantType === 'rent' && (
 										<div className='space-y-2'>
-											<Label htmlFor='rent'>Monthly Rent *</Label>
+											<Label htmlFor='rent'>Monthly rent and maintenance charge receivable *</Label>
 											<Input
 												id='rent'
 												value={formData.rent}
@@ -855,7 +855,7 @@ export default function
 										</div>
 									)}
 
-									<div className='space-y-2'>
+									{formData.tenantType === 'lease' && (<div className='space-y-2'>
 										<Label htmlFor='securityDeposit'>Security Deposit *</Label>
 										<Input
 											id='securityDeposit'
@@ -871,9 +871,9 @@ export default function
 												{errors.securityDeposit}
 											</p>
 										)}
-									</div>
+									</div>)}
 
-									<div className='space-y-2'>
+									{/* <div className='space-y-2'>
 										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
 										<Input
 											id='maintanance'
@@ -889,7 +889,7 @@ export default function
 												{errors.maintanance}
 											</p>
 										)}
-									</div>
+									</div> */}
 								</div>
 
 								{/* GST Section */}
