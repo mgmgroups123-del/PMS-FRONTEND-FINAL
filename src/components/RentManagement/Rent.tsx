@@ -95,6 +95,7 @@ const Rent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState<boolean>(false);
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -123,6 +124,15 @@ const Rent: React.FC = () => {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth() + 1;
 
+  // Generate years for filtering (current year and previous 5 years)
+  const generateYears = () => {
+    const years = [];
+    for (let i = -2; i <= 2; i++) {
+      years.push(currentYear + i);
+    }
+    return years.sort((a, b) => b - a); // Sort descending (newest first)
+  };
+
   // Generate months with years for proper filtering
   const generateMonthsWithYears = () => {
     const months = [];
@@ -145,7 +155,10 @@ const Rent: React.FC = () => {
   };
 
   const monthsWithYears = generateMonthsWithYears();
+  const years = generateYears();
+  
   const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState(currentYear.toString());
 
   const badgeRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -195,13 +208,12 @@ const Rent: React.FC = () => {
 
   const dispatch = useDispatch<any>();
   const rents = useSelector(getRent);
-  console.log("Rents From DB", rents)
 
-  // Function to fetch rent data for a specific month
+  // Function to fetch rent data for a specific month and year
   const fetchRentData = async (month?: number, year?: number) => {
     try {
-      const monthNumber = month || currentMonth;
-      const yearNumber = year || currentYear;
+      const monthNumber = month || (monthFilter !== "all" ? parseInt(monthFilter.split('-')[1]) : currentMonth);
+      const yearNumber = year || parseInt(yearFilter);
 
       const params = {
         month: monthNumber.toString(),
@@ -219,6 +231,13 @@ const Rent: React.FC = () => {
   useEffect(() => {
     fetchRentData();
   }, [dispatch]);
+
+  // Fetch data when filters change
+  useEffect(() => {
+    if (monthFilter !== "all" || yearFilter !== currentYear.toString()) {
+      fetchRentData();
+    }
+  }, [monthFilter, yearFilter]);
 
   const handleDownload = async (item: CombinedRentItem) => {
     try {
@@ -254,7 +273,6 @@ const Rent: React.FC = () => {
   };
 
   const handleStatusChange = async (uuid: string, newStatus: string) => {
-    console.log("Status", newStatus)
     try {
       setUpdatingId(uuid);
       const params = {
@@ -406,11 +424,21 @@ const Rent: React.FC = () => {
       const matchesStatus =
         statusFilter === "All Status" ? true : item.currentMonth.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [searchTerm, statusFilter, monthFilter, rents?.combined]);
+      // Month and Year filtering
+      let matchesMonthYear = true;
+      if (monthFilter !== "all") {
+        const [filterYear, filterMonth] = monthFilter.split('-');
+        const itemDueDate = new Date(item.currentMonth.dueDate);
+        const itemYear = itemDueDate.getFullYear();
+        const itemMonth = itemDueDate.getMonth() + 1;
+        
+        matchesMonthYear = itemYear.toString() === filterYear && itemMonth.toString() === filterMonth;
+      }
 
-  console.log("FilteredData", filteredData)
+      return matchesSearch && matchesStatus && matchesMonthYear;
+    });
+  }, [searchTerm, statusFilter, monthFilter, yearFilter, rents?.combined]);
+
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -420,7 +448,7 @@ const Rent: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, monthFilter, rowsPerPage]);
+  }, [searchTerm, statusFilter, monthFilter, yearFilter, rowsPerPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -440,12 +468,23 @@ const Rent: React.FC = () => {
     setSearchTerm('');
   };
 
+  const resetFilters = () => {
+    setMonthFilter("all");
+    setYearFilter(currentYear.toString());
+    setStatusFilter("All Status");
+    setSearchTerm("");
+  };
+
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
       const target = e.target as Node;
 
       if (isMonthDropdownOpen && !document.querySelector('.month-dropdown')?.contains(target)) {
         setIsMonthDropdownOpen(false);
+      }
+
+      if (isYearDropdownOpen && !document.querySelector('.year-dropdown')?.contains(target)) {
+        setIsYearDropdownOpen(false);
       }
 
       if (isStatusDropdownOpen && !document.querySelector('.status-dropdown')?.contains(target)) {
@@ -461,6 +500,7 @@ const Rent: React.FC = () => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsMonthDropdownOpen(false);
+        setIsYearDropdownOpen(false);
         setIsStatusDropdownOpen(false);
         setOpenDropdownId(null);
       }
@@ -473,7 +513,7 @@ const Rent: React.FC = () => {
       document.removeEventListener("mousedown", handleDocClick);
       document.removeEventListener("keydown", handleKey);
     };
-  }, [isMonthDropdownOpen, isStatusDropdownOpen, openDropdownId]);
+  }, [isMonthDropdownOpen, isYearDropdownOpen, isStatusDropdownOpen, openDropdownId]);
 
   const role = GetLocalStorage('role');
 
@@ -528,8 +568,9 @@ const Rent: React.FC = () => {
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex justify-between gap-4 mb-6">
         <div className='relative max-w-md flex-1'>
+        <div>
           <img
             src={searchImg}
             className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
@@ -549,15 +590,110 @@ const Rent: React.FC = () => {
             </button>
           )}
         </div>
+        </div>
+        <div className="flex gap-3">
 
-        <div className="relative w-28 ml-auto ">
+        {/* Year Filter */}
+        <div className="relative w-28">
+          <div
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+            onClick={() => {
+              setIsYearDropdownOpen((prev) => !prev);
+            }}
+          >
+            <span className="text-[#ed3237]">{yearFilter}</span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          {isYearDropdownOpen && (
+            <div className="absolute year-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+              {years.map((year) => (
+                <div
+                  key={year}
+                  onClick={() => {
+                    setYearFilter(year.toString());
+                    setIsYearDropdownOpen(false);
+                  }}
+                  className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${yearFilter === year.toString()
+                    ? "bg-[#ed3237] text-white"
+                    : "hover:bg-[#ed3237] hover:text-white"
+                    }`}
+                >
+                  {year}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Month Filter */}
+        <div className="relative w-48">
+          <div
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+            onClick={() => {
+              setIsMonthDropdownOpen((prev) => !prev);
+            }}
+          >
+            <span className="text-[#ed3237]">
+              {monthFilter === "all"
+                ? "All Months"
+                : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
+              }
+            </span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          {isMonthDropdownOpen && (
+            <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+              {monthsWithYears
+                .filter(month => month.value === "all" || month.year === parseInt(yearFilter))
+                .map((month) => (
+                  <div
+                    key={month.value}
+                    onClick={() => {
+                      setMonthFilter(month.value);
+                      setIsMonthDropdownOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month.value
+                      ? "bg-[#ed3237] text-white"
+                      : "hover:bg-[#ed3237] hover:text-white"
+                      }`}
+                  >
+                    {month.name}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
+        {/* Status Filter */}
+        <div className="relative w-28">
           <div
             className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
             onClick={() => {
               setIsStatusDropdownOpen((prev) => !prev);
-              setStatusFilter((prev) =>
-                prev === "All Status" ? "All Status" : prev
-              );
             }}
           >
             <span className="text-[#ed3237]">{statusFilter}</span>
@@ -594,60 +730,13 @@ const Rent: React.FC = () => {
           )}
         </div>
 
-        <div className="relative w-48">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsMonthDropdownOpen((prev) => !prev);
-            }}
-          >
-            <span className="text-[#ed3237]">
-              {monthFilter === "all"
-                ? "All Months"
-                : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
-              }
-            </span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {isMonthDropdownOpen && (
-            <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
-              {monthsWithYears.map((month) => (
-                <div
-                  key={month.value}
-                  onClick={() => {
-                    setMonthFilter(month.value);
-                    setIsMonthDropdownOpen(false);
-
-                    // Fetch data for selected month
-                    if (month.value !== "all") {
-                      const [year, monthNum] = month.value.split('-');
-                      fetchRentData(parseInt(monthNum), parseInt(year));
-                    } else {
-                      fetchRentData();
-                    }
-                  }}
-                  className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month.value
-                    ? "bg-[#ed3237] text-white"
-                    : "hover:bg-[#ed3237] hover:text-white"
-                    }`}
-                >
-                  {month.name}
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Reset Filters Button */}
+        <button
+          onClick={resetFilters}
+          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Reset Filters
+        </button>
         </div>
       </div>
 
@@ -727,7 +816,6 @@ const Rent: React.FC = () => {
                                     key={s}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      console.log("Changing status for previous rent:", item.previousMonth.uuid, s);
                                       if (role === "owner" || role === "manager") {
                                         handleStatusChange(item.previousMonth.uuid, s);
                                         setOpenPreviousDropdownId(null);
