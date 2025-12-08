@@ -50,8 +50,7 @@ type ModalMode = "add" | "view" | "edit";
 type UnitModalMode = "add" | "edit";
 
 interface Property {
-  id: number;
-  _id?: string;
+  id: string;
   uuid?: string;
   name: string;
   location: string;
@@ -170,7 +169,7 @@ function Properties() {
 
   const mappedProperties: Property[] =
     properties?.map((p: any, index: number) => ({
-      id: index + 1,
+      id: p.id,
       name: p.property_name,
       location: p.property_address || p.owner_information?.address || "",
       image: getImageUrl(p.image) || propertyImg1,
@@ -191,7 +190,7 @@ function Properties() {
         occupancyRate: p.occupancy_rate || 0,
       },
       uuid: p.uuid,
-      _id: p._id,
+      _id: p.id,
     })) || [];
 
   console.log(mappedProperties, "")
@@ -319,7 +318,6 @@ function Properties() {
         property_name: formData.propertyName,
         property_type: formData.propertyType,
         square_feet: formData.squareFeet,
-        total_units: formData.totalUnits || "1",
         property_address: formData.address,
         image: fileUrl || null,
         owner_information: {
@@ -1147,7 +1145,7 @@ function Properties() {
                           ...unitForm,
                           property: value,
                           propertyUuid: selectedProp?.uuid || "",
-                          propertyId: selectedProp?._id || "",
+                          propertyId: selectedProp?.id || "",
                         });
                       }}
                     >
@@ -1157,7 +1155,7 @@ function Properties() {
                       <SelectContent className="bg-white">
                         {mappedProperties.map((property) => (
                           <SelectItem
-                            key={property._id}
+                            key={property.id}
                             value={property.name}
                             className="text-[#7D7D7D] hover:bg-[#ed3237] hover:text-white"
                           >

@@ -84,11 +84,11 @@ export default function EditTenantForm({
 				emailAddress: tenant?.personal_information?.email || '',
 				address: tenant?.personal_information?.address || '',
 				phoneNumber: tenant?.personal_information?.phone || '',
-				unit: tenant?.unit?._id || '',
-				propertytype: tenant?.unit?.propertyId?.property_type || '',
-				propertyName: tenant?.unit?.propertyId?.uuid || '',
+				unit: tenant?.unitRelation?.id || '',
+				propertytype: tenant?.unitRelation?.property?.property_type || '',
+				propertyName: tenant?.unitRelation?.property?.uuid || '',
 				tenantType: tenant?.tenant_type || '',
-				propertyInformation: tenant?.unit?.unit_address || '',
+				propertyInformation: tenant?.unitRelation?.unit_address || '',
 				rent: tenant?.financial_information?.rent || '',
 				securityDeposit: tenant?.deposit || '',
 				hasGst: tenant?.hasGST,
@@ -249,18 +249,18 @@ export default function EditTenantForm({
 				},
 				tenant_type: formData.tenantType,
 				unit: formData.unit,
-				rent: formData.totalmonthlyrent,
-				deposit:  formData.securityDeposit,
+				rent: Number(formData.totalmonthlyrent),
+				deposit:  Number(formData.securityDeposit),
 				hasGST: formData.hasGst,
 				financial_information: {
 					rent: formData.rent,
 					...(formData.tenantType === 'rent' &&
 						formData.hasGst && {
-						cgst: formData.cgst,
-						sgst: formData.sgst,
-						tds: formData.tds,
+						cgst: Number(formData.cgst),
+						sgst: Number(formData.sgst),
+						tds: Number(formData.tds),
 					}),
-					maintenance: formData.maintanance,
+					maintenance: Number(formData.maintanance),
 				},
 			};
 			const response = await editTenants({
@@ -401,7 +401,7 @@ export default function EditTenantForm({
 											</SelectTrigger>
 											<SelectContent className='bg-white'>
 												{commercial?.map((c: any) => (
-													<SelectItem value={`${c?.uuid}`} key={c?._id}>
+													<SelectItem value={`${c?.uuid}`} key={c?.id}>
 														{c?.property_name}
 													</SelectItem>
 												))}
@@ -438,7 +438,7 @@ export default function EditTenantForm({
 											</SelectTrigger>
 											<SelectContent className='bg-white'>
 												{unitData?.map((item: any) => (
-													<SelectItem key={item?._id} value={item?._id}>
+													<SelectItem key={item?.id} value={item?.id}>
 														{item?.unit_name}
 													</SelectItem>
 												))}

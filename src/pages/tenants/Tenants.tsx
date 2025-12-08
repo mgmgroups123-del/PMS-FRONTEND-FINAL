@@ -60,7 +60,7 @@ interface Tenant {
 		relation: string;
 	};
 	tenant_type: string;
-	unit: {
+	unitRelation: {
 		unit_name: string;
 	};
 	rent: string;
@@ -437,7 +437,7 @@ export default function Tenants() {
 													{tenant?.personal_information?.full_name}
 												</h3>
 												<p className='text-gray-500 text-xs'>
-													{tenant?.unit?.unit_name}
+													{tenant?.unitRelation?.unit_name}
 												</p>
 											</div>
 										</div>

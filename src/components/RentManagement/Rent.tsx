@@ -340,13 +340,13 @@ const Rent: React.FC = () => {
   useEffect(() => {
     if (selectedRent && isModalOpen) {
       setEditableData({
-        full_name: selectedRent.tenantName || "",
-        rent: selectedRent.currentMonth.amount || 0,
+        full_name: selectedRent?.tenantName || "",
+        rent: selectedRent.currentMonth?.amount || 0,
         maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
-        cgst: selectedRent?.currentMonth.cgst || selectedRent?.previousMonth.cgst,
-        sgst: selectedRent?.currentMonth.sgst || selectedRent?.previousMonth.sgst,
-        tds: selectedRent?.currentMonth.tds || selectedRent?.previousMonth.tds,
-        total: selectedRent?.currentMonth.total || selectedRent?.previousMonth.total
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
       });
     }
   }, [selectedRent, isModalOpen]);
@@ -356,12 +356,12 @@ const Rent: React.FC = () => {
       // If canceling edit, reset to original values
       setEditableData({
         full_name: selectedRent?.tenantName || "",
-        rent: selectedRent?.currentMonth.amount || 0,
-        maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
-        cgst: selectedRent?.currentMonth.cgst || selectedRent?.previousMonth.cgst,
-        sgst: selectedRent?.currentMonth.sgst || selectedRent?.previousMonth.sgst,
-        tds: selectedRent?.currentMonth.tds || selectedRent?.previousMonth.tds,
-        total: selectedRent?.currentMonth.total || selectedRent?.previousMonth.total
+        rent: selectedRent?.currentMonth?.amount || 0,
+        maintenance: selectedRent?.currentMonth?.maintenance || selectedRent?.previousMonth.maintenance,
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
       });
     }
     setIsEditing(!isEditing);

@@ -122,7 +122,7 @@ const FinancialReport = () => {
 
   return (
     <div>
-      <div className=" my-6 flex gap-6">
+      <div className="flex gap-6">
         {/* Graph Data  */}
         <div className="w-full ">
           <section

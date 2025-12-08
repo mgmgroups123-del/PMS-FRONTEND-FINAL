@@ -239,7 +239,7 @@ export default function
 		if (selectedProperty === "land") {
 			const data: any = { uuid: selectedPropertyId };
 			const response = await GetByIdLandService(data);
-			setLandId(response?.data?._id)
+			setLandId(response?.data?.id)
 		} else {
 			const data = { uuid: selectedPropertyId };
 			const response = await getPropertyByIdData(data);
@@ -396,8 +396,8 @@ export default function
 				tenant_type: formData.tenantType,
 				unit_type: selectedProperty === "land" ? "land" : "unit",
 				unit: selectedProperty === "land" ? landId : formData.unit,
-				rent: formData.totalmonthlyrent,
-				deposit: formData.securityDeposit,
+				rent: Number(formData.totalmonthlyrent),
+				deposit: Number(formData.securityDeposit),
 				hasGST: formData.hasGst,
 				is_active: true,
 				is_deleted: false,
@@ -405,11 +405,11 @@ export default function
 					rent: formData.rent,
 					...(formData.tenantType === 'rent' &&
 						formData.hasGst && {
-						cgst: formData.cgst,
-						sgst: formData.sgst,
-						tds: formData.tds,
+						cgst: Number(formData.cgst),
+						sgst: Number(formData.sgst),
+						tds: Number(formData.tds),
 					}),
-					maintenance: formData.maintanance,
+					maintenance: Number(formData.maintanance),
 				},
 				// bank_details: {
 				// 	bank_name: formData.bankName,
@@ -785,9 +785,9 @@ export default function
 												{unitData?.length ? (
 													unitData.map((unit: any) => (
 														<SelectItem
-															key={unit._id}
-															value={unit._id}
-															className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.unit === unit._id
+															key={unit.id}
+															value={unit.id}
+															className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.unit === unit.id
 																? 'bg-[#ed3237] text-white'
 																: ''
 																}`}
