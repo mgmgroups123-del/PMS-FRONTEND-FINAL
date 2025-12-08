@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Building2, ChevronLeft, ChevronRight, X, } from "lucide-react";
 import Card2 from "./Card";
@@ -37,6 +38,7 @@ interface Tenant {
 }
 
 interface RentItem {
+  tenant: any;
   uuid: string;
   tenantId: Tenant;
   paymentDueDay: string;
@@ -262,7 +264,7 @@ const Rent: React.FC = () => {
   const filteredData = useMemo(() => {
     if (!rents?.rents) return [];
     return rents.rents.filter((item: RentItem) => {
-      const matchesSearch = item.tenantId?.personal_information?.full_name
+      const matchesSearch = item.tenant?.personal_information?.full_name
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
 
@@ -299,15 +301,15 @@ const Rent: React.FC = () => {
   };
 
   const totalDue = rents?.rents?.reduce(
-    (sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
+    (sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
 
   const totalPaid = rents?.rents
     ?.filter((item: RentItem) => item.status === "paid")
-    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
+    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
 
   const totalPending = rents?.rents
     ?.filter((item: RentItem) => item.status === "pending")
-    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
+    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
 
   const totalDeposits = rents?.TotalDeposit?.[0]?.total || 0;
 
@@ -548,18 +550,18 @@ const Rent: React.FC = () => {
                     </span>
                     <div className="grid ml-3">
                       <span className="font-bold text-black">
-                        {item.tenantId?.personal_information?.full_name || "N/A"}
+                        {item.tenant?.personal_information?.full_name || "N/A"}
                       </span>
-                      <span className="text-sm">{item?.tenantId?.unit?.unit_name || "N/A"}</span>
+                      <span className="text-sm">{item?.tenant?.unitRelation?.unit_name || "N/A"}</span>
                     </div>
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.tenantId?.rent || "0"}
+                    ₹{item.tenant?.rent || "0"}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.tenantId?.deposit || "0"}
+                    ₹{item.tenant?.deposit || "0"}
                   </td>
 
                   <td className="px-6 py-4  border-t border-b border-gray-200">
@@ -587,21 +589,21 @@ const Rent: React.FC = () => {
                       <span className="flex items-center gap-2 truncate">
                         <span>{item.status}</span>
                       </span>
-                        <svg
-                          className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
+                      <svg
+                        className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
                             `}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                    
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+
                     </div>
 
                     {openDropdownId === item.uuid && (
@@ -795,27 +797,27 @@ const Rent: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900">
-                    {selectedRent.tenantId?.personal_information?.full_name || "N/A"}
+                    {selectedRent.tenant?.personal_information?.full_name || "N/A"}
                   </h3>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
                     <span className="flex items-center text-[#7D7D7D]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                       </svg>
-                      {selectedRent.tenantId?.unit.unit_name || "N/A"}
+                      {selectedRent.tenant?.unitRelation.unit_name || "N/A"}
                     </span>
                     <span className="flex items-center text-[#7D7D7D]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                         <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                       </svg>
-                      {selectedRent.tenantId?.personal_information?.email || "N/A"}
+                      {selectedRent.tenant?.personal_information?.email || "N/A"}
                     </span>
                     <span className="flex items-center text-[#7D7D7D]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                       </svg>
-                      {selectedRent.tenantId?.personal_information?.phone || "N/A"}
+                      {selectedRent.tenant?.personal_information?.phone || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -836,16 +838,16 @@ const Rent: React.FC = () => {
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm text-[#7D7D7D]">Full Address</p>
-                        <p className="text-gray-800">{selectedRent.tenantId?.personal_information?.address || "N/A"}</p>
+                        <p className="text-gray-800">{selectedRent.tenant?.personal_information?.address || "N/A"}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-[#7D7D7D]">Lease Start</p>
-                          <p className="text-gray-800">{formatDate(selectedRent.tenantId?.lease_duration.start_date) || "N/A"}</p>
+                          <p className="text-gray-800">{formatDate(selectedRent.tenant?.lease_duration.start_date) || "N/A"}</p>
                         </div>
                         <div>
                           <p className="text-sm text-[#7D7D7D]">Lease End</p>
-                          <p className="text-gray-800">{formatDate(selectedRent.tenantId?.lease_duration.end_date) || "N/A"}</p>
+                          <p className="text-gray-800">{formatDate(selectedRent.tenant?.lease_duration.end_date) || "N/A"}</p>
                         </div>
                       </div>
                     </div>
@@ -884,27 +886,27 @@ const Rent: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">Base Rent</span>
-                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.rent || "0"}</span>
+                        <span className="font-medium">₹{selectedRent.tenant?.financial_information?.rent || "0"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">Maintenance</span>
-                        <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.maintenance || "0"}</span>
+                        <span className="font-medium">₹{selectedRent.tenant?.financial_information?.maintenance || "0"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">CGST</span>
-                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.cgst || "9"} %</span>
+                        <span className="font-medium">{selectedRent.tenant?.financial_information?.cgst || "9"} %</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">SGST</span>
-                        <span className="font-medium">{selectedRent.tenantId?.financial_information?.sgst || "9"} %</span>
+                        <span className="font-medium">{selectedRent.tenant?.financial_information?.sgst || "9"} %</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-gray-200">
                         <span className="text-[#7D7D7D]">TDS Deduction</span>
-                        <span className="text-red-500 font-medium">{selectedRent.tenantId?.financial_information?.tds || "-10"} %</span>
+                        <span className="text-red-500 font-medium">{selectedRent.tenant?.financial_information?.tds || "-10"} %</span>
                       </div>
                       <div className="flex justify-between pt-3 border-t border-gray-200">
                         <span className="font-semibold">Total Amount</span>
-                        <span className="font-bold text-lg">₹{selectedRent.tenantId?.rent || "0"}</span>
+                        <span className="font-bold text-lg">₹{selectedRent.tenant?.rent || "0"}</span>
                       </div>
                     </div>
                   </div>
