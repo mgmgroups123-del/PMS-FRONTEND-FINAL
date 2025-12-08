@@ -16,7 +16,7 @@ import {
 } from "../../features/maintenance/reducers/thunks.ts";
 import toast from "react-hot-toast";
 import searchImg from "../../assets/properties/search.png";
-import { Wallet,  IndianRupee  } from "lucide-react";
+import { Wallet, IndianRupee } from "lucide-react";
 
 import {
   Select,
@@ -89,14 +89,14 @@ const Maintenance = () => {
   }, [dispatch]);
 
   useEffect(() => {
-  if (!selectedProperty) return;
-  (async () => {
-    const propertyData = await dispatch(
-      GetallPropertyThunks({ property_type: selectedProperty })
-    );
-    setPropertyTypes(propertyData || []);
-  })();
-}, [dispatch, selectedProperty]);
+    if (!selectedProperty) return;
+    (async () => {
+      const propertyData = await dispatch(
+        GetallPropertyThunks({ property_type: selectedProperty })
+      );
+      setPropertyTypes(propertyData || []);
+    })();
+  }, [dispatch, selectedProperty]);
 
 
   useEffect(() => {
@@ -229,7 +229,7 @@ const Maintenance = () => {
       setErrors({});
     });
   };
-  
+
 
   const totalCount = maintenanceList?.length || 0;
   const totalCost =
@@ -251,7 +251,7 @@ const Maintenance = () => {
     },
     {
       id: 2,
-      icon:   <IndianRupee />,
+      icon: <IndianRupee />,
       title: "Total Estimated Cost",
       number: `₹ ${totalCost?.toLocaleString()}`,
       bg: Background_Image_2,
@@ -308,13 +308,13 @@ const Maintenance = () => {
         </div>
         <div>
           <Button
-            onClick={() => {role === 'admin' ? undefined : setOpenrequest(!Openrequest)}}
+            onClick={() => { role === 'admin' ? undefined : setOpenrequest(!Openrequest) }}
             className={`flex items-center gap-2 bg-red-700 hover:bg-[#ed3237]  text-white px-4 py-2 rounded-lg shadow ${role === 'admin' ? `bg-red-700 opacity-50 cursor-not-allowed` : ``}`}
           >
-            <FaPlus/>
+            <FaPlus />
             <span>New Maintenance</span>
           </Button>
-        </div>  
+        </div>
       </div>
 
 
@@ -348,11 +348,11 @@ const Maintenance = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {currentItems?.length > 0 ? (
           currentItems.map((item) => (
-            <div key={item._id} className="bg-white rounded-xl shadow-xl overflow-hidden border">
+            <div key={item.id} className="bg-white rounded-xl shadow-xl overflow-hidden border">
 
               <div className="p-4 flex items-start justify-between text-white bg-red-700">
                 <div className="flex gap-4">
-                  
+
                   <div>
                     <h2 style={FONTS.card_headers} className="text-lg font-bold">
                       {item.title || "no data available"}
@@ -494,7 +494,7 @@ const Maintenance = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800" style={FONTS.headers}>
-              Add  Maintenance details
+                Add  Maintenance details
               </h3>
               <button
                 type="button"
@@ -573,7 +573,7 @@ const Maintenance = () => {
                   {propertyTypes
                     .filter((item) => item.property_type === formData.property_type)
                     .map((item) => (
-                      <option key={item._id} value={item.uuid}>
+                      <option key={item.id} value={item.uuid}>
                         {item.property_name}
                       </option>
                     ))}
@@ -592,7 +592,7 @@ const Maintenance = () => {
                 >
                   <option value="">Select Unit</option>
                   {units.map((unit) => (
-                    <option key={unit._id} value={unit._id}>
+                    <option key={unit.id} value={unit.id}>
                       {unit.unit_name}
                     </option>
                   ))}

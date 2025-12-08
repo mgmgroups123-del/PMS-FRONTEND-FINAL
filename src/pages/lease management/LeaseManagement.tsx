@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react"
 import { Search, Eye, Building2, Clock, FileX, Shield, X } from "lucide-react"
 import { Button } from "../../components/ui/button"
@@ -111,9 +112,9 @@ function LeaseManagement() {
 
 
   const transformedLeaseData: LeaseData[] = Leases.filter(
-    (lease: any) => lease._id && lease._id !== null
+    (lease: any) => lease.id && lease.id !== null
   ).map((lease: any) => {
-    const unit = lease.unit
+    const unit = lease.unitRelation
     const personalInfo = lease.personal_information
     const leaseDuration = lease.lease_duration
 
@@ -142,7 +143,7 @@ function LeaseManagement() {
         : "N/A"
 
     return {
-      id: lease._id || lease.uuid,
+      id: lease.id || lease.uuid,
       name: personalInfo?.full_name || "No Name",
       unit: `${unit?.unit_name || unit?.land_name || "N/A"}`,
       avatar: "",

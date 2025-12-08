@@ -55,8 +55,8 @@ interface CombinedRentItem {
   companyName: string;
   lease_start_date: string;
   lease_end_date: string;
-  address:string;
-  tenantEmail:string;
+  address: string;
+  tenantEmail: string;
   currentMonth: {
     uuid: string;
     amount: number;
@@ -101,8 +101,8 @@ const Rent: React.FC = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null); 
-  const [openPreviousDropdownId, setOpenPreviousDropdownId] = useState<string | null>(null); 
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [openPreviousDropdownId, setOpenPreviousDropdownId] = useState<string | null>(null);
   const [selectedRent, setSelectedRent] = useState<CombinedRentItem | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -156,7 +156,7 @@ const Rent: React.FC = () => {
 
   const monthsWithYears = generateMonthsWithYears();
   const years = generateYears();
-  
+
   const [monthFilter, setMonthFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState(currentYear.toString());
 
@@ -343,10 +343,10 @@ const Rent: React.FC = () => {
         full_name: selectedRent.tenantName || "",
         rent: selectedRent.currentMonth.amount || 0,
         maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
-        cgst: selectedRent?.currentMonth.cgst || selectedRent?.previousMonth.cgst,
-        sgst: selectedRent?.currentMonth.sgst || selectedRent?.previousMonth.sgst,
-        tds: selectedRent?.currentMonth.tds || selectedRent?.previousMonth.tds,
-        total: selectedRent?.currentMonth.total || selectedRent?.previousMonth.total
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
       });
     }
   }, [selectedRent, isModalOpen]);
@@ -358,10 +358,10 @@ const Rent: React.FC = () => {
         full_name: selectedRent?.tenantName || "",
         rent: selectedRent?.currentMonth.amount || 0,
         maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
-        cgst: selectedRent?.currentMonth.cgst || selectedRent?.previousMonth.cgst,
-        sgst: selectedRent?.currentMonth.sgst || selectedRent?.previousMonth.sgst,
-        tds: selectedRent?.currentMonth.tds || selectedRent?.previousMonth.tds,
-        total: selectedRent?.currentMonth.total || selectedRent?.previousMonth.total
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
       });
     }
     setIsEditing(!isEditing);
@@ -431,7 +431,7 @@ const Rent: React.FC = () => {
         const itemDueDate = new Date(item.currentMonth.dueDate);
         const itemYear = itemDueDate.getFullYear();
         const itemMonth = itemDueDate.getMonth() + 1;
-        
+
         matchesMonthYear = itemYear.toString() === filterYear && itemMonth.toString() === filterMonth;
       }
 
@@ -570,173 +570,173 @@ const Rent: React.FC = () => {
 
       <div className="flex justify-between gap-4 mb-6">
         <div className='relative max-w-md flex-1'>
-        <div>
-          <img
-            src={searchImg}
-            className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
-          />
-          <Input
-            placeholder='Search by tenant name'
-            className='pl-10 h-10 w-[80%] bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333] rounded-lg focus-visible:ring-[#000] focus-visible:border-[#000]'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={resetSearch}
-              className='absolute right-24 top-7 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-[#000] focus-visible:border-[#000]'
-            >
-              <X className='w-4 h-4' />
-            </button>
-          )}
-        </div>
+          <div>
+            <img
+              src={searchImg}
+              className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
+            />
+            <Input
+              placeholder='Search by tenant name'
+              className='pl-10 h-10 w-[80%] bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333] rounded-lg focus-visible:ring-[#000] focus-visible:border-[#000]'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                onClick={resetSearch}
+                className='absolute right-24 top-7 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-[#000] focus-visible:border-[#000]'
+              >
+                <X className='w-4 h-4' />
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex gap-3">
 
-        {/* Year Filter */}
-        <div className="relative w-28">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsYearDropdownOpen((prev) => !prev);
-            }}
-          >
-            <span className="text-[#ed3237]">{yearFilter}</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Year Filter */}
+          <div className="relative w-28">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsYearDropdownOpen((prev) => !prev);
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {isYearDropdownOpen && (
-            <div className="absolute year-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
-              {years.map((year) => (
-                <div
-                  key={year}
-                  onClick={() => {
-                    setYearFilter(year.toString());
-                    setIsYearDropdownOpen(false);
-                  }}
-                  className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${yearFilter === year.toString()
-                    ? "bg-[#ed3237] text-white"
-                    : "hover:bg-[#ed3237] hover:text-white"
-                    }`}
-                >
-                  {year}
-                </div>
-              ))}
+              <span className="text-[#ed3237]">{yearFilter}</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </div>
-          )}
-        </div>
-
-        {/* Month Filter */}
-        <div className="relative w-48">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsMonthDropdownOpen((prev) => !prev);
-            }}
-          >
-            <span className="text-[#ed3237]">
-              {monthFilter === "all"
-                ? "All Months"
-                : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
-              }
-            </span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {isMonthDropdownOpen && (
-            <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
-              {monthsWithYears
-                .filter(month => month.value === "all" || month.year === parseInt(yearFilter))
-                .map((month) => (
+            {isYearDropdownOpen && (
+              <div className="absolute year-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+                {years.map((year) => (
                   <div
-                    key={month.value}
+                    key={year}
                     onClick={() => {
-                      setMonthFilter(month.value);
-                      setIsMonthDropdownOpen(false);
+                      setYearFilter(year.toString());
+                      setIsYearDropdownOpen(false);
                     }}
-                    className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month.value
+                    className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${yearFilter === year.toString()
                       ? "bg-[#ed3237] text-white"
                       : "hover:bg-[#ed3237] hover:text-white"
                       }`}
                   >
-                    {month.name}
+                    {year}
                   </div>
                 ))}
-            </div>
-          )}
-        </div>
-
-        {/* Status Filter */}
-        <div className="relative w-28">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsStatusDropdownOpen((prev) => !prev);
-            }}
-          >
-            <span className="text-[#ed3237]">{statusFilter}</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+              </div>
+            )}
           </div>
-          {isStatusDropdownOpen && (
-            <div className="absolute status-dropdown w-full bg-white text-[#7D7D7D] shadow-xl mt-1 rounded-lg border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
-              {filterStatusOptions.map((status) => (
-                <div
-                  key={status}
-                  onClick={() => {
-                    setStatusFilter(status);
-                    setIsStatusDropdownOpen(false);
-                  }}
-                  className={`px-3 py-2 rounded-md active:bg-[#ed3237] active:text-white cursor-pointer border transition-colors ${statusFilter === status ? "bg-[#ed3237] text-white" : ""
-                    }`}
-                >
-                  {status}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Reset Filters Button */}
-        <button
-          onClick={resetFilters}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Reset Filters
-        </button>
+          {/* Month Filter */}
+          <div className="relative w-48">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsMonthDropdownOpen((prev) => !prev);
+              }}
+            >
+              <span className="text-[#ed3237]">
+                {monthFilter === "all"
+                  ? "All Months"
+                  : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
+                }
+              </span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            {isMonthDropdownOpen && (
+              <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+                {monthsWithYears
+                  .filter(month => month.value === "all" || month.year === parseInt(yearFilter))
+                  .map((month) => (
+                    <div
+                      key={month.value}
+                      onClick={() => {
+                        setMonthFilter(month.value);
+                        setIsMonthDropdownOpen(false);
+                      }}
+                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month.value
+                        ? "bg-[#ed3237] text-white"
+                        : "hover:bg-[#ed3237] hover:text-white"
+                        }`}
+                    >
+                      {month.name}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative w-28">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsStatusDropdownOpen((prev) => !prev);
+              }}
+            >
+              <span className="text-[#ed3237]">{statusFilter}</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            {isStatusDropdownOpen && (
+              <div className="absolute status-dropdown w-full bg-white text-[#7D7D7D] shadow-xl mt-1 rounded-lg border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
+                {filterStatusOptions.map((status) => (
+                  <div
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setIsStatusDropdownOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-md active:bg-[#ed3237] active:text-white cursor-pointer border transition-colors ${statusFilter === status ? "bg-[#ed3237] text-white" : ""
+                      }`}
+                  >
+                    {status}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Reset Filters Button */}
+          <button
+            onClick={resetFilters}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Reset Filters
+          </button>
         </div>
       </div>
 
@@ -1152,12 +1152,12 @@ const Rent: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <div>
-                        <p className="text-sm text-[#7D7D7D]">Lease start date</p>
-                        <p className="text-gray-800">{dayjs(selectedRent.lease_start_date).format("DD-MM-YYYY") || "N/A"}</p>
+                          <p className="text-sm text-[#7D7D7D]">Lease start date</p>
+                          <p className="text-gray-800">{dayjs(selectedRent.lease_start_date).format("DD-MM-YYYY") || "N/A"}</p>
                         </div>
                         <div>
-                        <p className="text-sm text-[#7D7D7D]">Lease end date</p>
-                        <p className="text-gray-800">{dayjs(selectedRent.lease_end_date).format("DD-MM-YYYY") || "N/A"}</p>
+                          <p className="text-sm text-[#7D7D7D]">Lease end date</p>
+                          <p className="text-gray-800">{dayjs(selectedRent.lease_end_date).format("DD-MM-YYYY") || "N/A"}</p>
                         </div>
                       </div>
                     </div>
