@@ -12,7 +12,7 @@ import { Input } from "../ui/input";
 import searchImg from '../../assets/properties/search.png';
 import { GetLocalStorage } from "../../utils/localstorage";
 import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
-import { editTenants, patchTenants } from "../../features/tenants/services";
+import { patchTenants } from "../../features/tenants/services";
 import dayjs from "dayjs";
 
 interface PersonalInformation {
@@ -462,7 +462,7 @@ const Rent: React.FC = () => {
   const totalDue = rents?.totalDueAmount || 0;
   const totalPaid = rents?.totalPaidThisMonth || 0;
   const totalPending = rents?.totalPendingThisMonth || 0;
-  const totalDeposits = rents?.TotalDeposit?.[0]?.total || 0;
+  const totalDeposits = rents?.TotalDeposit || 0;
 
   const resetSearch = () => {
     setSearchTerm('');
