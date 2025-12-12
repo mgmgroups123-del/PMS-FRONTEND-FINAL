@@ -623,7 +623,7 @@ function Properties() {
                       variant="secondary"
                       className="absolute top-3 right-3 bg-white text-[#ed3237] hover:bg-white/90"
                     >
-                      {property?.tag.charAt(0).toUpperCase() + property?.tag.slice(1).toLowerCase()}
+                      {property?.tag?.charAt(0).toUpperCase() + property?.tag?.slice(1)?.toLowerCase()}
                     </Badge>
                   </div>
                   <div className="p-2">

@@ -4,14 +4,14 @@ import { FONTS } from "../../constants/ui constants";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTenantData } from "../../features/tenants/reducers/Thunks";
 import { tenantSelector } from "../../features/tenants/reducers/Selector";
-import { ChevronLeft, ChevronRight} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type props = {
   selectedType: string;
   setSelectedType: Dispatch<SetStateAction<string>>;
 }
 
-const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
+const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
   const dispatch = useDispatch<any>();
   const { data, loading, error } = useSelector(tenantSelector);
   const tenants = data?.tenants || [];
@@ -50,27 +50,27 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
   // Filter tenants by year + month + type + search
   const filteredTenants = tenants.filter((tenant: any) => {
     if (!tenant.createdAt) return false;
-    
+
     // Date filters
     const createdDate = new Date(tenant.createdAt);
     const year = createdDate.getFullYear();
     const month = createdDate.getMonth() + 1;
-    
+
     // Type filter
-    const typeMatch = 
-      selectedType === "All Types" || 
+    const typeMatch =
+      selectedType === "All Types" ||
       tenant.tenant_type.toLowerCase() === selectedType.toLowerCase();
-    
+
     // Search filter
-    const searchMatch = 
+    const searchMatch =
       searchTerm === "" ||
       tenant.personal_information.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tenant.personal_information.phone.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return (
-      year === selectedYear && 
-      month === selectedMonth && 
-      typeMatch && 
+      year === selectedYear &&
+      month === selectedMonth &&
+      typeMatch &&
       searchMatch
     );
   });
@@ -93,9 +93,9 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
 
   const availableYears = [
     ...new Set(tenants.map((t: any) => new Date(t.createdAt).getFullYear())),
-  ].sort((a: any, b:  any) => b - a);
+  ].sort((a: any, b: any) => b - a);
 
- 
+
   const formatDate = (dateString: any) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -128,7 +128,7 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
           {/* Filters */}
           <div className="flex flex-wrap gap-4 mb-6">
             {/* Search */}
-           
+
             {/* Year Filter */}
             <div className="relative w-32">
               <div
@@ -159,11 +159,10 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
                         setSelectedYear(year);
                         setIsYearDropdownOpen(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${
-                        selectedYear === year
-                          ? "bg-[#ed3237] text-white"
-                          : "hover:bg-[#ed3237] hover:text-white"
-                      }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${selectedYear === year
+                        ? "bg-[#ed3237] text-white"
+                        : "hover:bg-[#ed3237] hover:text-white"
+                        }`}
                     >
                       {year}
                     </div>
@@ -204,11 +203,10 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
                         setSelectedMonth(month.number);
                         setIsMonthDropdownOpen(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${
-                        selectedMonth === month.number
-                          ? "bg-[#ed3237] text-white"
-                          : "hover:bg-[#ed3237] hover:text-white"
-                      }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${selectedMonth === month.number
+                        ? "bg-[#ed3237] text-white"
+                        : "hover:bg-[#ed3237] hover:text-white"
+                        }`}
                     >
                       {month.name}
                     </div>
@@ -247,11 +245,10 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
                         setSelectedType(type);
                         setIsTypeDropdownOpen(false);
                       }}
-                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${
-                        selectedType === type
-                          ? "bg-[#ed3237] text-white"
-                          : "hover:bg-[#ed3237] hover:text-white"
-                      }`}
+                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${selectedType === type
+                        ? "bg-[#ed3237] text-white"
+                        : "hover:bg-[#ed3237] hover:text-white"
+                        }`}
                     >
                       {type}
                     </div>
@@ -301,7 +298,7 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
                     <span>{formatDate(tenant.lease_duration.end_date)}</span>
                   </div>
                   <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
-                    {tenant.unit?.unit_name || "N/A"}
+                    {tenant.unitRelation?.unit_name || "N/A"}
                   </p>
                   <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
                     ₹{Number(tenant.rent).toLocaleString()}
@@ -360,11 +357,10 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
                           <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                              page === currentPage
-                                ? "bg-[#ed3237] text-white border-[#ed3237]"
-                                : "border-gray-300 hover:bg-gray-50"
-                            }`}
+                            className={`px-3 py-2 text-sm rounded-lg border transition-colors ${page === currentPage
+                              ? "bg-[#ed3237] text-white border-[#ed3237]"
+                              : "border-gray-300 hover:bg-gray-50"
+                              }`}
                           >
                             {page}
                           </button>

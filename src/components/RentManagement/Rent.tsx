@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Building2, ChevronLeft, ChevronRight, X, Edit, Save } from "lucide-react";
 import Card2 from "./Card";
@@ -38,6 +39,7 @@ interface Tenant {
 }
 
 interface RentItem {
+  tenant: any;
   uuid: string;
   tenantId: Tenant;
   paymentDueDay: string;
