@@ -30,6 +30,7 @@ import { GetLocalStorage } from "../../utils/localstorage.tsx";
 
 
 interface MaintenanceItem {
+  Unit: any;
   _id: string;
   title: string;
   description: string;
@@ -359,7 +360,7 @@ const Maintenance = () => {
                     </h2>
                     <p style={FONTS.chart_legend} className="text-sm">
                       {item.full_name || "no data available"} •
-                      {typeof item.unitId === "string" ? item.unitId : item.unitId?.unit_name || "no unit"}
+                      {typeof item.unitId === "string" ? item?.Unit.unit_name : item.unitId?.unit_name || "no unit"}
                     </p>
                   </div>
                 </div>
