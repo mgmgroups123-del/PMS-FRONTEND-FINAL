@@ -25,6 +25,11 @@ export const editTenants = async (data: any) => {
 	if (response) return response;
 };
 
+export const patchTenants = async (data: any) => {
+	const response = await Client.tenant.patchUpdate(data);
+	if (response) return response;
+};
+
 export const getPropertyData = async (data: any) => {
 	const response = await Client.property.getProperty(data);
 	if (response) return response;

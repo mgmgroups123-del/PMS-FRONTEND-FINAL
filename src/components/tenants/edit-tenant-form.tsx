@@ -69,7 +69,7 @@ export default function EditTenantForm({
 		accountNumber: '',
 		branch: '',
 		ifscNumber: '',
-		rentDueDate: ''
+		rentDueDate: '',
 	});
 
 	const [commercial, setCommercial] = useState<any>();
@@ -84,14 +84,14 @@ export default function EditTenantForm({
 				emailAddress: tenant?.personal_information?.email || '',
 				address: tenant?.personal_information?.address || '',
 				phoneNumber: tenant?.personal_information?.phone || '',
-				unit: tenant?.unit?._id || '',
-				propertytype: tenant?.unit?.propertyId?.property_type || '',
-				propertyName: tenant?.unit?.propertyId?.uuid || '',
+				unit: tenant?.unitRelation?.id || '',
+				propertytype: tenant?.unitRelation?.property?.property_type || '',
+				propertyName: tenant?.unitRelation?.property?.uuid || '',
 				tenantType: tenant?.tenant_type || '',
-				propertyInformation: tenant?.unit?.unit_address || '',
+				propertyInformation: tenant?.unitRelation?.unit_address || '',
 				rent: tenant?.financial_information?.rent || '',
 				securityDeposit: tenant?.deposit || '',
-				hasGst: true,
+				hasGst: tenant?.hasGST,
 				cgst: tenant?.financial_information?.cgst || '9',
 				sgst: tenant?.financial_information?.sgst || '9',
 				tds: tenant?.financial_information?.tds || '-10',
@@ -119,7 +119,7 @@ export default function EditTenantForm({
 				accountNumber: tenant?.bank_details?.account_number || '',
 				branch: tenant?.bank_details?.bank_branch || '',
 				ifscNumber: tenant?.bank_details?.bank_IFSC || '',
-				rentDueDate: tenant?.lease_duration?.due_date || ''
+				rentDueDate: tenant?.lease_duration?.due_date || '',
 			});
 
 			setSelectedProperty(tenant?.unit?.propertyId?.property_type || '');
@@ -173,20 +173,20 @@ export default function EditTenantForm({
 	const calculateTotalRent = () => {
 		const rent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
-		const cgstPercentage = parseFloat(formData.cgst) || 0;
-		const sgstPercentage = parseFloat(formData.sgst) || 0;
-		const tdsPercentage = parseFloat(formData.tds) || 0;
+		// const cgstPercentage = parseFloat(formData.cgst) || 0;
+		// const sgstPercentage = parseFloat(formData.sgst) || 0;
+		// const tdsPercentage = parseFloat(formData.tds) || 0;
 
 		let subtotal = 0;
 		let total = 0;
 
 		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
-			const cgstAmount = (rent * cgstPercentage) / 100;
-			const sgstAmount = (rent * sgstPercentage) / 100;
-			const tdsAmount = (rent * Math.abs(tdsPercentage)) / 100;
+			// const cgstAmount = (rent * cgstPercentage) / 100;
+			// const sgstAmount = (rent * sgstPercentage) / 100;
+			// const tdsAmount = (rent * Math.abs(tdsPercentage)) / 100;
 			
-			subtotal = rent + maintenance + cgstAmount + sgstAmount;
-			total = rent + maintenance - tdsAmount;
+			// subtotal = rent + maintenance + cgstAmount + sgstAmount;
+			total = rent + maintenance;
 		} else {
 			total = rent + maintenance;
 		}
@@ -249,17 +249,18 @@ export default function EditTenantForm({
 				},
 				tenant_type: formData.tenantType,
 				unit: formData.unit,
-				rent: formData.totalmonthlyrent,
-				deposit:  formData.securityDeposit,
+				rent: Number(formData.totalmonthlyrent),
+				deposit:  Number(formData.securityDeposit),
+				hasGST: formData.hasGst,
 				financial_information: {
 					rent: formData.rent,
 					...(formData.tenantType === 'rent' &&
 						formData.hasGst && {
-						cgst: formData.cgst,
-						sgst: formData.sgst,
-						tds: formData.tds,
+						cgst: Number(formData.cgst),
+						sgst: Number(formData.sgst),
+						tds: Number(formData.tds),
 					}),
-					maintenance: formData.maintanance,
+					maintenance: Number(formData.maintanance),
 				},
 			};
 			const response = await editTenants({
@@ -400,7 +401,7 @@ export default function EditTenantForm({
 											</SelectTrigger>
 											<SelectContent className='bg-white'>
 												{commercial?.map((c: any) => (
-													<SelectItem value={`${c?.uuid}`} key={c?._id}>
+													<SelectItem value={`${c?.uuid}`} key={c?.id}>
 														{c?.property_name}
 													</SelectItem>
 												))}
@@ -437,7 +438,7 @@ export default function EditTenantForm({
 											</SelectTrigger>
 											<SelectContent className='bg-white'>
 												{unitData?.map((item: any) => (
-													<SelectItem key={item?._id} value={item?._id}>
+													<SelectItem key={item?.id} value={item?.id}>
 														{item?.unit_name}
 													</SelectItem>
 												))}
@@ -517,7 +518,7 @@ export default function EditTenantForm({
 												<Label htmlFor='gstCheckbox'>Include GST</Label>
 											</div>
 
-											{formData.hasGst && (
+											{/* {formData.hasGst && (
 												<div className='grid grid-cols-3 gap-4'>
 													<div className='space-y-2'>
 														<Label htmlFor='cgst'>CGST (%) *</Label>
@@ -555,13 +556,13 @@ export default function EditTenantForm({
 														/>
 													</div>
 												</div>
-											)}
+											)} */}
 										</>
 									)}
 								</div>
 								{formData.tenantType === 'rent' && (
 									<>
-										<div className='space-y-2'>
+										{/* <div className='space-y-2'>
 											<Label htmlFor='subtotal'>Subtotal (Rent + Maintenance + GST)</Label>
 											<Input
 												id='subtotal'
@@ -569,9 +570,9 @@ export default function EditTenantForm({
 												placeholder='Calculated subtotal'
 												readOnly
 											/>
-										</div>
+										</div> */}
 										<div className='space-y-2'>
-											<Label htmlFor='totalmonthlyrent'>Total (Rent + Maintenance - TDS)</Label>
+											<Label htmlFor='totalmonthlyrent'>Total</Label>
 											<Input
 												id='totalmonthlyrent'
 												value={formData.totalmonthlyrent}

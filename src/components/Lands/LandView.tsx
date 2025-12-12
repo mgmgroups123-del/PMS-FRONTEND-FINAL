@@ -28,7 +28,6 @@ export type LandsDetailsForm = {
   is_active?: boolean;
   is_deleted?: boolean;
   image: string;
-  land_type: string;
 };
 
 interface Props {
@@ -57,7 +56,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
     owner_email: "",
     owner_phone: "",
     owner_address: "",
-    land_type: "land",
   });
 
   useEffect(() => {
@@ -73,7 +71,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
         owner_email: selectedProperty.owner_information?.email || "",
         owner_phone: selectedProperty.owner_information?.phone || "",
         owner_address: selectedProperty.owner_information?.address || "",
-        land_type: "land",
         uuid: selectedProperty.uuid,
       });
 
@@ -93,7 +90,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
         owner_email: "",
         owner_phone: "",
         owner_address: "",
-        land_type: "land",
       });
       setUploadedImage(null);
     }
@@ -147,7 +143,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
         address: formData.owner_address
       },
       image: fileUrl || "",
-      land_type: "land",
     }
 
     try {
@@ -175,7 +170,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
         owner_email: "",
         owner_phone: "",
         owner_address: "",
-        land_type: "land",
       });
       setOpenViewModal(false);
       setSelectedProperty?.(null);

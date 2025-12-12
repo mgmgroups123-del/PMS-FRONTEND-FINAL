@@ -143,7 +143,7 @@ function LeaseManagement() {
         : "N/A"
 
     return {
-      id: lease._id || lease.uuid,
+      id: lease.id || lease.uuid,
       name: personalInfo?.full_name || "No Name",
       unit: `${unit?.unit_name || unit?.land_name || "N/A"}`,
       avatar: "",

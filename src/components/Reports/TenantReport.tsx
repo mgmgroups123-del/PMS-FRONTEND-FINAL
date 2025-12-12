@@ -114,7 +114,7 @@ const TenantReport:React.FC<props> = ({selectedType, setSelectedType}) => {
   }
 
   return (
-    <div className="p-8">
+    <div className="my-5">
       {tenants.length === 0 ? (
         <div className="w-full text-center mt-15 mb-20">
           <img src={Empty_Report} alt="EmptyImg" className="w-[280px] m-auto" />

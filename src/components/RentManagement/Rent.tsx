@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Building2, ChevronLeft, ChevronRight, X, } from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight, X, Edit, Save } from "lucide-react";
 import Card2 from "./Card";
-// import frame2 from "../../assets/cardimg1.png";
-// import frame3 from "../../assets/image 315.png";
 import { BiSolidBuildings } from "react-icons/bi";
 import { FONTS } from "../../constants/ui constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +13,8 @@ import { Input } from "../ui/input";
 import searchImg from '../../assets/properties/search.png';
 import { GetLocalStorage } from "../../utils/localstorage";
 import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
+import { patchTenants } from "../../features/tenants/services";
+import dayjs from "dayjs";
 
 interface PersonalInformation {
   full_name: string;
@@ -34,7 +34,8 @@ interface Tenant {
   lease_start_date: string;
   lease_end_date: string;
   emergency_contact: string;
-  financial_information: any
+  financial_information: any;
+  uuid: string
 }
 
 interface RentItem {
@@ -44,50 +45,125 @@ interface RentItem {
   paymentDueDay: string;
   status: string;
   bankDetails: string;
+  previousMonthDue?: number;
+  previousMonthStatus?: string;
+}
+
+// New interface for backend response structure
+interface CombinedRentItem {
+  tenantId: string;
+  tenantName: string;
+  floor: string;
+  companyName: string;
+  lease_start_date: string;
+  lease_end_date: string;
+  address: string;
+  tenantEmail: string;
+  currentMonth: {
+    uuid: string;
+    amount: number;
+    status: string;
+    dueDate: string;
+    cgst: number;
+    sgst: number;
+    maintenance: number;
+    tds: number;
+    total: number;
+  };
+  previousMonth: {
+    uuid: string;
+    amount: number;
+    status: string;
+    dueDate: string;
+    cgst: number;
+    sgst: number;
+    maintenance: number;
+    tds: number;
+    total: number;
+  };
+}
+
+interface EditableRentData {
+  full_name: string;
+  rent: any;
+  maintenance: any;
+  cgst: any;
+  sgst: any;
+  tds: any;
+  total: any;
 }
 
 const Rent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState<boolean>(false);
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState<boolean>(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const [selectedRent, setSelectedRent] = useState<RentItem | null>(null);
+  const [openPreviousDropdownId, setOpenPreviousDropdownId] = useState<string | null>(null);
+  const [selectedRent, setSelectedRent] = useState<CombinedRentItem | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState<EditableRentData>({
+    full_name: "",
+    rent: 0,
+    maintenance: 0,
+    cgst: 0,
+    sgst: 0,
+    tds: 0,
+    total: 0
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
   const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
 
-  const months = [
-    "All Months",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  // Generate years for filtering (current year and previous 5 years)
+  const generateYears = () => {
+    const years = [];
+    for (let i = -2; i <= 2; i++) {
+      years.push(currentYear + i);
+    }
+    return years.sort((a, b) => b - a); // Sort descending (newest first)
+  };
 
-  const currentMonthIndex = today.getMonth();
-  const currentMonthName = months[currentMonthIndex + 1];
+  // Generate months with years for proper filtering
+  const generateMonthsWithYears = () => {
+    const months = [];
+    const currentDate = new Date();
 
-  const [monthFilter, setMonthFilter] = useState(currentMonthName);
+    // Add 12 months including current and previous months
+    for (let i = -2; i <= 9; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+      const monthName = date.toLocaleString('default', { month: 'long' });
+      const year = date.getFullYear();
+      months.push({
+        name: `${monthName} ${year}`,
+        value: `${year}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
+        monthIndex: date.getMonth() + 1,
+        year: year
+      });
+    }
 
+    return [{ name: "All Months", value: "all" }, ...months];
+  };
+
+  const monthsWithYears = generateMonthsWithYears();
+  const years = generateYears();
+
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState(currentYear.toString());
 
   const badgeRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-
 
   const statusOptions = ["paid", "pending", "overdue"];
   const filterStatusOptions = ["All Status", "paid", "pending", "overdue"];
@@ -135,42 +211,54 @@ const Rent: React.FC = () => {
   const dispatch = useDispatch<any>();
   const rents = useSelector(getRent);
 
+  // Function to fetch rent data for a specific month and year
+  const fetchRentData = async (month?: number, year?: number) => {
+    try {
+      const monthNumber = month || (monthFilter !== "all" ? parseInt(monthFilter.split('-')[1]) : currentMonth);
+      const yearNumber = year || parseInt(yearFilter);
 
+      const params = {
+        month: monthNumber.toString(),
+        year: yearNumber.toString(),
+      };
+
+      await dispatch(fetchRentThunk(params));
+    } catch (err) {
+      console.error("Error fetching rent data:", err);
+      toast.error("Failed to fetch rent data");
+    }
+  };
+
+  // Fetch initial data
   useEffect(() => {
-    const fetchRentData = async () => {
-      try {
-        // Month index for API (1-12)
-        const monthNumber = today.getMonth() + 1;
-        const yearNumber = today.getFullYear();
-
-        const params = {
-          month: monthNumber.toString(),
-          year: yearNumber.toString(),
-        };
-
-        await dispatch(fetchRentThunk(params));
-      } catch (err) {
-        console.error("Error fetching rent data:", err);
-      } finally {
-      }
-    };
-
     fetchRentData();
   }, [dispatch]);
 
+  // Fetch data when filters change
+  useEffect(() => {
+    if (monthFilter !== "all" || yearFilter !== currentYear.toString()) {
+      fetchRentData();
+    }
+  }, [monthFilter, yearFilter]);
 
-  const handleDownload = async (uuid: string) => {
+  const handleDownload = async (item: CombinedRentItem) => {
     try {
-      setDownloadingId(uuid);
-
-      const response = await downloadRent(uuid);
+      setDownloadingId(item.currentMonth.uuid);
+      const dueDate = new Date(item.currentMonth.dueDate);
+      const year = dueDate.getFullYear();
+      const month = dueDate.getMonth() + 1;
+      const payload = {
+        uuid: item.currentMonth.uuid,
+        year: year,
+        month: month
+      }
+      const response = await downloadRent(payload);
       toast.success("File downloaded successfully");
 
-      // Create a Blob URL
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.download = `rent_receipt_${uuid}_${new Date()
+      link.download = `rent_receipt_${item.currentMonth.uuid}_${new Date()
         .toISOString()
         .slice(0, 10)}.pdf`;
 
@@ -186,24 +274,19 @@ const Rent: React.FC = () => {
     }
   };
 
-
   const handleStatusChange = async (uuid: string, newStatus: string) => {
     try {
       setUpdatingId(uuid);
       const params = {
         uuid: uuid,
-        status: newStatus
+        status: newStatus,
       };
 
       await updateRent(params);
       toast.success('Status updated successfully!');
 
-      const fetchParams = {
-        month: (today.getMonth() + 1).toString(),
-        year: today.getFullYear().toString(),
-      };
-
-      await dispatch(fetchRentThunk(fetchParams));
+      // Refresh current month data
+      await fetchRentData();
       // Refresh dashboard data to update pending payments count
       dispatch(DashboardThunks());
     } catch (error) {
@@ -215,21 +298,15 @@ const Rent: React.FC = () => {
     setOpenDropdownId(null);
   };
 
-
-
   const handleDelete = async () => {
     if (!deletingId) return;
-    console.log("delete id", deletingId)
+
     try {
       setIsDeleting(true);
       await deleteRent(deletingId)
       toast.success('Rent deleted successfully!');
 
-      const fetchParams = {
-        month: "8",
-        year: "2025"
-      };
-      await dispatch(fetchRentThunk(fetchParams));
+      await fetchRentData();
       // Refresh dashboard data to update pending payments count
       dispatch(DashboardThunks());
 
@@ -261,24 +338,108 @@ const Rent: React.FC = () => {
     }
   };
 
+  // Initialize editable data when modal opens
+  useEffect(() => {
+    if (selectedRent && isModalOpen) {
+      setEditableData({
+        full_name: selectedRent?.tenantName || "",
+        rent: selectedRent.currentMonth?.amount || 0,
+        maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
+      });
+    }
+  }, [selectedRent, isModalOpen]);
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // If canceling edit, reset to original values
+      setEditableData({
+        full_name: selectedRent?.tenantName || "",
+        rent: selectedRent?.currentMonth?.amount || 0,
+        maintenance: selectedRent?.currentMonth?.maintenance || selectedRent?.previousMonth.maintenance,
+        cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
+        sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
+        tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
+        total: selectedRent?.currentMonth?.total || selectedRent?.previousMonth?.total
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedRent) return;
+
+    try {
+      setIsSaving(true);
+      // Note: You'll need to adjust this based on your actual tenant update API
+      const data = {
+        uuid: selectedRent.tenantId,
+        data: {
+          personal_information: { full_name: editableData.full_name },
+          financial_information: {
+            rent: Number(editableData.rent),
+            maintenance: Number(editableData.maintenance),
+            cgst: Number(editableData.cgst),
+            sgst: Number(editableData.sgst),
+            tds: Number(editableData.tds),
+            total: Number(editableData.total)
+          },
+          rent: Number(editableData.total),
+        }
+      };
+
+      const response = await patchTenants(data);
+      if (response.success) {
+        toast.success('Changes saved successfully!');
+        setIsEditing(false);
+      }
+
+      // Refresh the data
+      await fetchRentData();
+
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+      toast.error('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof EditableRentData, value: string) => {
+    setEditableData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const filteredData = useMemo(() => {
-    if (!rents?.rents) return [];
-    return rents.rents.filter((item: RentItem) => {
-      const matchesSearch = item.tenant?.personal_information?.full_name
+    if (!rents?.combined) return [];
+
+    return rents.combined.filter((item: CombinedRentItem) => {
+      const matchesSearch = item.tenantName
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
 
       const matchesStatus =
-        statusFilter === "All Status" ? true : item.status === statusFilter;
+        statusFilter === "All Status" ? true : item.currentMonth.status === statusFilter;
 
-      const matchesMonth =
-        monthFilter === "All Months"
-          ? true
-          : months[new Date(item.paymentDueDay).getMonth() + 1] === monthFilter;
+      // Month and Year filtering
+      let matchesMonthYear = true;
+      if (monthFilter !== "all") {
+        const [filterYear, filterMonth] = monthFilter.split('-');
+        const itemDueDate = new Date(item.currentMonth.dueDate);
+        const itemYear = itemDueDate.getFullYear();
+        const itemMonth = itemDueDate.getMonth() + 1;
 
-      return matchesSearch && matchesStatus && matchesMonth;
+        matchesMonthYear = itemYear.toString() === filterYear && itemMonth.toString() === filterMonth;
+      }
+
+      return matchesSearch && matchesStatus && matchesMonthYear;
     });
-  }, [searchTerm, statusFilter, monthFilter, rents?.rents]);
+  }, [searchTerm, statusFilter, monthFilter, yearFilter, rents?.combined]);
 
 
   const totalItems = filteredData.length;
@@ -289,7 +450,7 @@ const Rent: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, monthFilter, rowsPerPage]);
+  }, [searchTerm, statusFilter, monthFilter, yearFilter, rowsPerPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -300,22 +461,20 @@ const Rent: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const totalDue = rents?.rents?.reduce(
-    (sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
-
-  const totalPaid = rents?.rents
-    ?.filter((item: RentItem) => item.status === "paid")
-    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
-
-  const totalPending = rents?.rents
-    ?.filter((item: RentItem) => item.status === "pending")
-    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenant?.rent) || 0), 0) || 0;
-
-  const totalDeposits = rents?.TotalDeposit?.[0]?.total || 0;
-
+  const totalDue = rents?.totalDueAmount || 0;
+  const totalPaid = rents?.totalPaidThisMonth || 0;
+  const totalPending = rents?.totalPendingThisMonth || 0;
+  const totalDeposits = rents?.TotalDeposit || 0;
 
   const resetSearch = () => {
     setSearchTerm('');
+  };
+
+  const resetFilters = () => {
+    setMonthFilter("all");
+    setYearFilter(currentYear.toString());
+    setStatusFilter("All Status");
+    setSearchTerm("");
   };
 
   useEffect(() => {
@@ -324,6 +483,10 @@ const Rent: React.FC = () => {
 
       if (isMonthDropdownOpen && !document.querySelector('.month-dropdown')?.contains(target)) {
         setIsMonthDropdownOpen(false);
+      }
+
+      if (isYearDropdownOpen && !document.querySelector('.year-dropdown')?.contains(target)) {
+        setIsYearDropdownOpen(false);
       }
 
       if (isStatusDropdownOpen && !document.querySelector('.status-dropdown')?.contains(target)) {
@@ -339,6 +502,7 @@ const Rent: React.FC = () => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsMonthDropdownOpen(false);
+        setIsYearDropdownOpen(false);
         setIsStatusDropdownOpen(false);
         setOpenDropdownId(null);
       }
@@ -351,12 +515,12 @@ const Rent: React.FC = () => {
       document.removeEventListener("mousedown", handleDocClick);
       document.removeEventListener("keydown", handleKey);
     };
-  }, [isMonthDropdownOpen, isStatusDropdownOpen, openDropdownId]);
+  }, [isMonthDropdownOpen, isYearDropdownOpen, isStatusDropdownOpen, openDropdownId]);
 
-  const role = GetLocalStorage('role')
+  const role = GetLocalStorage('role');
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div className="font-bold">
           <span className="text-2xl"> Rent Management </span>
@@ -406,118 +570,175 @@ const Rent: React.FC = () => {
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex justify-between gap-4 mb-6">
         <div className='relative max-w-md flex-1'>
-          <img
-            src={searchImg}
-            className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
-          />
-          <Input
-            placeholder='Search by tenant name'
-            className='pl-10 h-10 w-[80%] bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333] rounded-lg focus-visible:ring-[#000] focus-visible:border-[#000]'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={resetSearch}
-              className='absolute right-24 top-7 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-[#000] focus-visible:border-[#000]'
-            >
-              <X className='w-4 h-4' />
-            </button>
-          )}
-        </div>
-
-        <div className="relative w-28 ml-auto ">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsStatusDropdownOpen((prev) => !prev);
-              setStatusFilter((prev) =>
-                prev === "All Status" ? "All Status" : prev
-              );
-            }}
-          >
-            <span className="text-[#ed3237]">{statusFilter}</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+          <div>
+            <img
+              src={searchImg}
+              className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
+            />
+            <Input
+              placeholder='Search by tenant name'
+              className='pl-10 h-10 w-[80%] bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333] rounded-lg focus-visible:ring-[#000] focus-visible:border-[#000]'
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                onClick={resetSearch}
+                className='absolute right-24 top-7 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:ring-[#000] focus-visible:border-[#000]'
+              >
+                <X className='w-4 h-4' />
+              </button>
+            )}
           </div>
-          {isStatusDropdownOpen && (
-            <div className="absolute status-dropdown w-full bg-white text-[#7D7D7D] shadow-xl mt-1 rounded-lg border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
-              {filterStatusOptions.map((status) => (
-                <div
-                  key={status}
-                  onClick={() => {
-                    setStatusFilter(status);
-                    setIsStatusDropdownOpen(false);
-                  }}
-                  className={`px-3 py-2 rounded-md active:bg-[#ed3237] active:text-white cursor-pointer border transition-colors ${statusFilter === status ? "bg-[#ed3237] text-white" : ""
-                    }`}
-                >
-                  {status}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+        <div className="flex gap-3">
 
-        <div className="relative w-28 ">
-          <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
-            onClick={() => {
-              setIsMonthDropdownOpen((prev) => !prev);
-              setMonthFilter((prev) =>
-                prev === "All Months" ? "All Months" : prev
-              );
-            }}
-          >
-            <span className="text-[#ed3237]">{monthFilter}</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Year Filter */}
+          <div className="relative w-28">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsYearDropdownOpen((prev) => !prev);
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          {isMonthDropdownOpen && (
-            <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
-              {months.map((month) => (
-                <div
-                  key={month}
-                  onClick={() => {
-                    setMonthFilter(month);
-                    setIsMonthDropdownOpen(false);
-                  }}
-                  className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month
-                    ? "bg-[#ed3237] text-white"
-                    : "hover:bg-[#ed3237] hover:text-white"
-                    }`}
-                >
-                  {month}
-                </div>
-              ))}
+              <span className="text-[#ed3237]">{yearFilter}</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
             </div>
+            {isYearDropdownOpen && (
+              <div className="absolute year-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+                {years.map((year) => (
+                  <div
+                    key={year}
+                    onClick={() => {
+                      setYearFilter(year.toString());
+                      setIsYearDropdownOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${yearFilter === year.toString()
+                      ? "bg-[#ed3237] text-white"
+                      : "hover:bg-[#ed3237] hover:text-white"
+                      }`}
+                  >
+                    {year}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
+          {/* Month Filter */}
+          <div className="relative w-48">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsMonthDropdownOpen((prev) => !prev);
+              }}
+            >
+              <span className="text-[#ed3237]">
+                {monthFilter === "all"
+                  ? "All Months"
+                  : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
+                }
+              </span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            {isMonthDropdownOpen && (
+              <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
+                {monthsWithYears
+                  .filter(month => month.value === "all" || month.year === parseInt(yearFilter))
+                  .map((month) => (
+                    <div
+                      key={month.value}
+                      onClick={() => {
+                        setMonthFilter(month.value);
+                        setIsMonthDropdownOpen(false);
+                      }}
+                      className={`px-3 py-2 rounded-md cursor-pointer border transition-colors ${monthFilter === month.value
+                        ? "bg-[#ed3237] text-white"
+                        : "hover:bg-[#ed3237] hover:text-white"
+                        }`}
+                    >
+                      {month.name}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
 
-          )}
+          {/* Status Filter */}
+          <div className="relative w-28">
+            <div
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#ed32371A]"
+              onClick={() => {
+                setIsStatusDropdownOpen((prev) => !prev);
+              }}
+            >
+              <span className="text-[#ed3237]">{statusFilter}</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            {isStatusDropdownOpen && (
+              <div className="absolute status-dropdown w-full bg-white text-[#7D7D7D] shadow-xl mt-1 rounded-lg border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
+                {filterStatusOptions.map((status) => (
+                  <div
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setIsStatusDropdownOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-md active:bg-[#ed3237] active:text-white cursor-pointer border transition-colors ${statusFilter === status ? "bg-[#ed3237] text-white" : ""
+                      }`}
+                  >
+                    {status}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Reset Filters Button */}
+          <button
+            onClick={resetFilters}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Reset Filters
+          </button>
         </div>
       </div>
 
@@ -526,71 +747,126 @@ const Rent: React.FC = () => {
           <thead className="bg-gray-100" style={{ ...FONTS.Table_Header }}>
             <tr>
               <th className="px-6 py-4 rounded-l-lg">Company Name</th>
-              <th className="px-6 py-4">Amount</th>
-              <th className="px-6 py-4">Deposit</th>
-              <th className="px-6 py-4">Due Date</th>
-              <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4">Rent Amount</th>
+              <th className="px-6 py-4">Previous Due Amount & Status</th>
+              <th className="px-6 py-4">Current Due date</th>
+              <th className="px-6 py-4">Current Status</th>
               <th className="px-6 py-4 rounded-r-lg">Actions</th>
             </tr>
           </thead>
           <tbody style={{ ...FONTS.Table_Body }}>
             {paginatedData.length > 0 ? (
-              paginatedData?.map((item: RentItem) => (
+              paginatedData?.map((item: CombinedRentItem) => (
                 <tr
-                  key={item.uuid}
+                  key={item.currentMonth.uuid}
                   className="shadow-sm text-[#7D7D7D] hover:shadow-md transition-shadow"
                 >
                   <td className="px-6 py-4 flex rounded-l-lg text-lg border-l border-t border-b border-gray-200">
                     <span
                       className={`rounded p-2 flex items-center justify-center ${getStatusStyle(
-                        item.status
+                        item.currentMonth.status
                       )}`}
                     >
                       <BiSolidBuildings className="text-2xl" />
                     </span>
                     <div className="grid ml-3">
                       <span className="font-bold text-black">
-                        {item.tenant?.personal_information?.full_name || "N/A"}
+                        {item.tenantName || "N/A"}
                       </span>
-                      <span className="text-sm">{item?.tenant?.unitRelation?.unit_name || "N/A"}</span>
+                      <span className="text-sm">{item.floor || "N/A"}</span>
                     </div>
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.tenant?.rent || "0"}
+                    ₹{item.currentMonth.amount || "0"}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.tenant?.deposit || "0"}
+                    <div className="flex flex-col gap-2">
+                      {/* Previous Month Due with Status */}
+                      {item?.previousMonth?.amount > 0 ? (
+                        <div className="flex items-center justify-between bg-red-50 p-2 rounded border border-red-200">
+                          <span className="text-sm text-red-700 font-medium">
+                            ₹{item.previousMonth.amount}
+                          </span>
+                          <div className="relative">
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (role === "owner" || role === "manager") {
+                                  setOpenPreviousDropdownId(
+                                    openPreviousDropdownId === item.previousMonth.uuid
+                                      ? null
+                                      : item.previousMonth.uuid
+                                  );
+                                }
+                              }}
+                              className={`inline-flex items-center cursor-pointer px-2 py-1 rounded text-xs font-medium ${getStatusStyle(
+                                item.previousMonth.status || "overdue"
+                              )}`}
+                            >
+                              <span className="capitalize">{item.previousMonth.status}</span>
+                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+
+                            {openPreviousDropdownId === item.previousMonth.uuid && (
+                              <div className="absolute right-0 mt-1 bg-white shadow-xl rounded-lg border border-gray-300 z-20 overflow-y-auto p-2 space-y-2 min-w-[120px]">
+                                {statusOptions.map((s) => (
+                                  <div
+                                    key={s}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (role === "owner" || role === "manager") {
+                                        handleStatusChange(item.previousMonth.uuid, s);
+                                        setOpenPreviousDropdownId(null);
+                                      }
+                                    }}
+                                    className={`flex items-center px-3 text-[#7D7D7D] py-2 rounded-md cursor-pointer border hover:bg-[#ed323710] transition-colors ${item.previousMonth.status === s ? "bg-[#ed323710] text-[#ed3237]" : ""
+                                      }`}
+                                  >
+                                    <span className="capitalize">{s}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-green-600 bg-green-50 p-2 rounded border border-green-200 text-center">
+                          No Previous Dues
+                        </div>
+                      )}
+
+                    </div>
                   </td>
 
                   <td className="px-6 py-4  border-t border-b border-gray-200">
-
-                    <span> {formatDate(item.paymentDueDay)}</span>
-
+                    <span> {formatDate(item.currentMonth.dueDate)}</span>
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200 relative">
                     <div
                       ref={(el) => {
-                        if (openDropdownId === item.uuid && el)
+                        if (openDropdownId === item.currentMonth.uuid && el)
                           badgeRef.current = el;
                       }}
                       onClick={(e) => {
                         badgeRef.current = e.currentTarget as HTMLDivElement;
                         setOpenDropdownId((prev) =>
-                          prev === item.uuid ? null : item.uuid
+                          prev === item.currentMonth.uuid ? null : item.currentMonth.uuid
                         );
                       }}
                       className={`inline-flex items-center justify-between cursor-pointer h-10 px-3 py-1 rounded-md border text-sm font-medium ${role === 'owner' || role === 'manager' ? `` : `opacity-50 cursor-not-allowed`}  ${getStatusStyle(
-                        item.status
-                      )} min-w-[100px] ${updatingId === item.uuid ? 'opacity-50 pointer-events-none' : ''}`}
+                        item.currentMonth.status
+                      )} min-w-[100px] ${updatingId === item.currentMonth.uuid ? 'opacity-50 pointer-events-none' : ''}`}
                     >
-                      <span className="flex items-center gap-2 truncate">
-                        <span>{item.status}</span>
+                      <span className="flex items-center gap-2 truncate capitalize">
+                        <span>{item.currentMonth.status}</span>
                       </span>
                       <svg
-                        className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.uuid ? "rotate-180" : ""}
+                        className={`w-4 h-4 ml-2 transition-transform ${openDropdownId === item.currentMonth.uuid ? "rotate-180" : ""}
                             `}
                         fill="none"
                         stroke="currentColor"
@@ -603,10 +879,9 @@ const Rent: React.FC = () => {
                           d="M19 9l-7 7-7-7"
                         />
                       </svg>
-
                     </div>
 
-                    {openDropdownId === item.uuid && (
+                    {openDropdownId === item.currentMonth.uuid && (
                       <div
                         ref={dropdownRef}
                         style={{
@@ -619,13 +894,17 @@ const Rent: React.FC = () => {
                         {statusOptions.map((s) => (
                           <div
                             key={s}
-                            onClick={() => { role === 'owner' || role === 'manager' ? handleStatusChange(item.uuid, s) : undefined }}
-                            className={`flex items-center px-3 text-[#7D7D7D] py-2 rounded-md cursor-pointer border hover:bg-[#ed323710] transition-colors ${role === 'owner' || role === 'manager' ? `cursor-pointer` : `opacity-50 cursor-not-allowed`}  ${item.status === s
+                            onClick={() => {
+                              if (role === 'owner' || role === 'manager') {
+                                handleStatusChange(item.currentMonth.uuid, s);
+                              }
+                            }}
+                            className={`flex items-center px-3 text-[#7D7D7D] py-2 rounded-md cursor-pointer border hover:bg-[#ed323710] transition-colors ${role === 'owner' || role === 'manager' ? `cursor-pointer` : `opacity-50 cursor-not-allowed`}  ${item.currentMonth.status === s
                               ? "bg-[#ed323710] text-[#ed3237]"
                               : ""
                               }`}
                           >
-                            <span>{s}</span>
+                            <span className="capitalize">{s}</span>
                           </div>
                         ))}
                       </div>
@@ -639,15 +918,16 @@ const Rent: React.FC = () => {
                         onClick={() => {
                           setSelectedRent(item);
                           setIsModalOpen(true);
+                          setIsEditing(false);
                         }}
                       >
                         View
                       </button>
                       <button
-                        className={`hover:bg-[#ed3237] bg-[#ed3237] text-white px-3 py-1 rounded-lg transition-colors  ${downloadingId === item.uuid ? 'opacity-50 pointer-events-none' : ''
+                        className={`hover:bg-[#ed3237] bg-[#ed3237] text-white px-3 py-1 rounded-lg transition-colors  ${downloadingId === item.currentMonth.uuid ? 'opacity-50 pointer-events-none' : ''
                           }`}
-                        onClick={() => handleDownload(item.uuid)}
-                        disabled={downloadingId === item.uuid}
+                        onClick={() => handleDownload(item)}
+                        disabled={downloadingId === item.currentMonth.uuid}
                       >
                         Download
                       </button>
@@ -657,7 +937,7 @@ const Rent: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-[#7D7D7D]">
+                <td colSpan={6} className="px-6 py-8 text-center text-[#7D7D7D]">
                   No rent data found
                 </td>
               </tr>
@@ -771,60 +1051,92 @@ const Rent: React.FC = () => {
         </div>
       )}
 
-
+      {/* View/Edit Rent Modal */}
       {isModalOpen && selectedRent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white z-10 p-6 pb-4 border-b flex justify-between items-start">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Rent Payment Details</h2>
-                <p className="text-[#7D7D7D] mt-1">{formatDate(selectedRent.paymentDueDay) || "N/A"}</p>
+                <p className="text-[#7D7D7D] mt-1">{formatDate(selectedRent.currentMonth.dueDate) || "N/A"}</p>
               </div>
-              <button
-                className="text-gray-400  bg-gray-500 w-6 h-6 hover:bg-gray-700 rounded-full transition-colors p-1 -mr-2"
-                onClick={() => setIsModalOpen(false)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 text-white w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2">
+                {!isEditing ? (
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={handleEditToggle}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                ) : (
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
+                )}
+                <button
+                  className="text-gray-400 bg-gray-500 w-6 h-6 hover:bg-gray-700 rounded-full transition-colors p-1"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setIsEditing(false);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 text-white w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-8">
               <div className="flex items-center gap-5">
-                <div className={`rounded-xl p-4 ${getStatusStyle(selectedRent.status)}`}>
+                <div className={`rounded-xl p-4 ${getStatusStyle(selectedRent.currentMonth.status)}`}>
                   <BiSolidBuildings className="text-4xl text-white" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {selectedRent.tenant?.personal_information?.full_name || "N/A"}
-                  </h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      {selectedRent.tenant?.unitRelation.unit_name || "N/A"}
-                    </span>
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                      {selectedRent.tenant?.personal_information?.email || "N/A"}
-                    </span>
-                    <span className="flex items-center text-[#7D7D7D]">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                      </svg>
-                      {selectedRent.tenant?.personal_information?.phone || "N/A"}
-                    </span>
-                  </div>
+                <div className="flex-1">
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Tenant Name
+                        </label>
+                        <Input
+                          value={editableData.full_name}
+                          onChange={(e) => handleInputChange('full_name', e.target.value)}
+                          className="w-full"
+                          placeholder="Enter tenant name"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {editableData.full_name || "N/A"}
+                      </h3>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                        <span className="flex items-center text-[#7D7D7D]">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          {selectedRent.floor || "N/A"}
+                        </span>
+                        <span className="flex items-center text-[#7D7D7D]">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          {selectedRent.tenantEmail || "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-
-
-
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -838,16 +1150,16 @@ const Rent: React.FC = () => {
                     <div className="space-y-3">
                       <div>
                         <p className="text-sm text-[#7D7D7D]">Full Address</p>
-                        <p className="text-gray-800">{selectedRent.tenant?.personal_information?.address || "N/A"}</p>
+                        <p className="text-gray-800">{selectedRent.address || "N/A"}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="flex justify-between">
                         <div>
-                          <p className="text-sm text-[#7D7D7D]">Lease Start</p>
-                          <p className="text-gray-800">{formatDate(selectedRent.tenant?.lease_duration.start_date) || "N/A"}</p>
+                          <p className="text-sm text-[#7D7D7D]">Lease start date</p>
+                          <p className="text-gray-800">{dayjs(selectedRent.lease_start_date).format("DD-MM-YYYY") || "N/A"}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-[#7D7D7D]">Lease End</p>
-                          <p className="text-gray-800">{formatDate(selectedRent.tenant?.lease_duration.end_date) || "N/A"}</p>
+                          <p className="text-sm text-[#7D7D7D]">Lease end date</p>
+                          <p className="text-gray-800">{dayjs(selectedRent.lease_end_date).format("DD-MM-YYYY") || "N/A"}</p>
                         </div>
                       </div>
                     </div>
@@ -862,16 +1174,11 @@ const Rent: React.FC = () => {
                     </h4>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusStyle(selectedRent.status)}`}></span>
-                        <span className="font-medium capitalize">{selectedRent.status || "N/A"}</span>
+                        <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusStyle(selectedRent.currentMonth.status)}`}></span>
+                        <span className="font-medium capitalize">{selectedRent.currentMonth.status || "N/A"}</span>
                       </div>
-                      {/* <div>
-                        <span className="text-sm text-[#7D7D7D]">Security Deposit:</span>
-                        <span className="ml-2 font-medium">₹{selectedRent.tenantId?.deposit || "0"}</span>
-                      </div> */}
                     </div>
                   </div>
-
                 </div>
 
                 <div className="space-y-6">
@@ -884,41 +1191,108 @@ const Rent: React.FC = () => {
                       Rent Details
                     </h4>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-[#7D7D7D]">Base Rent</span>
-                        <span className="font-medium">₹{selectedRent.tenant?.financial_information?.rent || "0"}</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.rent}
+                            onChange={(e) => handleInputChange('rent', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="font-medium">₹{editableData.rent || "0"}</span>
+                        )}
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-[#7D7D7D]">Maintenance</span>
-                        <span className="font-medium">₹{selectedRent.tenant?.financial_information?.maintenance || "0"}</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.maintenance}
+                            onChange={(e) => handleInputChange('maintenance', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="font-medium">₹{editableData.maintenance || "0"}</span>
+                        )}
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">CGST</span>
-                        <span className="font-medium">{selectedRent.tenant?.financial_information?.cgst || "9"} %</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.cgst}
+                            onChange={(e) => handleInputChange('cgst', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (
+                          <span className="font-medium">₹{editableData.cgst || "0"}</span>
+                        )}
+
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#7D7D7D]">SGST</span>
-                        <span className="font-medium">{selectedRent.tenant?.financial_information?.sgst || "9"} %</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.sgst}
+                            onChange={(e) => handleInputChange('sgst', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (<span className="font-medium">₹{editableData.sgst || "0"} </span>)}
+
                       </div>
                       <div className="flex justify-between pt-2 border-t border-gray-200">
                         <span className="text-[#7D7D7D]">TDS Deduction</span>
-                        <span className="text-red-500 font-medium">{selectedRent.tenant?.financial_information?.tds || "-10"} %</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.tds}
+                            onChange={(e) => handleInputChange('tds', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />) : (<span className="text-red-500 font-medium">₹{editableData.tds || "0"}</span>)}
+
                       </div>
                       <div className="flex justify-between pt-3 border-t border-gray-200">
                         <span className="font-semibold">Total Amount</span>
-                        <span className="font-bold text-lg">₹{selectedRent.tenant?.rent || "0"}</span>
+                        {isEditing ? (
+                          <Input
+                            value={editableData.total}
+                            onChange={(e) => handleInputChange('total', e.target.value)}
+                            className="w-32 text-right"
+                            type="number"
+                            placeholder="0"
+                          />
+                        ) : (<span className="font-bold text-lg">₹{Number(editableData.total) || "0"}</span>)}
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
 
             <div className="sticky bottom-0 bg-white border-t p-4 flex justify-end space-x-3">
+              {isEditing && (
+                <button
+                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={handleEditToggle}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+              )}
               <button
-                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-300 transition-colors"
-                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setIsEditing(false);
+                }}
               >
                 Close
               </button>
@@ -926,7 +1300,7 @@ const Rent: React.FC = () => {
                 className={`px-6 py-2.5 bg-red-600 rounded-lg text-white hover:bg-red-400 transition-colors ${role === 'owner' ? `` : `bg-red-600 opacity-50 cursor-not-allowed`} `}
                 onClick={() => {
                   if (role === 'owner') {
-                    setDeletingId(selectedRent.uuid);
+                    setDeletingId(selectedRent.currentMonth.uuid);
                     setIsModalOpen(false);
                     setIsDeleteModalOpen(true);
                   }
@@ -938,8 +1312,6 @@ const Rent: React.FC = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };

@@ -20,10 +20,10 @@ const ViewAllUnits = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (property?._id) {
-      dispatch(fetchUnitsByPropertyId(property._id));
+    if (property?.id) {
+      dispatch(fetchUnitsByPropertyId(property.id));
     }
-  }, [dispatch, property?._id]);
+  }, [dispatch, property?.id]);
 
   const handleDeleteClick = (unit: any) => {
     setSelectedUnit(unit);
@@ -35,10 +35,10 @@ const ViewAllUnits = () => {
     
     setIsDeleting(true);
     try {
-      await deleteUnit(selectedUnit._id || selectedUnit.uuid);
+      await deleteUnit(selectedUnit.id || selectedUnit.uuid);
       toast.success("Unit deleted successfully!");
       // Refresh units list
-      dispatch(fetchUnitsByPropertyId(property._id));
+      dispatch(fetchUnitsByPropertyId(property.id));
       setIsDeleteModalOpen(false);
       setSelectedUnit(null);
     } catch (error) {
@@ -202,7 +202,7 @@ const ViewAllUnits = () => {
           <tbody>
             {units?.length > 0 ? (
               units?.map((unit: any) => (
-                <tr key={unit?._id || unit?.uuid} className="border-t">
+                <tr key={unit?.id || unit?.uuid} className="border-t">
                   <td className="px-4 py-2">{unit?.unit_name}</td>
                   <td className="px-4 py-2">{unit?.unit_sqft}</td>
                   <td className="px-4 py-2">{unit?.unit_address}</td>

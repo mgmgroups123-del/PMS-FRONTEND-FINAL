@@ -60,7 +60,7 @@ interface Tenant {
 		relation: string;
 	};
 	tenant_type: string;
-	unit: {
+	unitRelation: {
 		unit_name: string;
 	};
 	rent: string;
@@ -281,7 +281,7 @@ export default function Tenants() {
 					</div>
 					<Button
 						onClick={() => { role === 'admin' || role === 'manager' ? undefined : setShowForm(true) }}
-						className={`hover:bg-[#ed3237] bg-red-700 text-white px-6 py-2 focus-visible:ring-[#000] focus-visible:border-[#000] ${role === 'admin' || role === 'manager' ? `bg-red-700 opacity-50 cursor-not-allowed` : ``}`}
+						className={`bg-[#ed3237] hover:bg-red-700 text-white px-6 py-2 focus-visible:ring-[#000] focus-visible:border-[#000] ${role === 'admin' || role === 'manager' ? `bg-red-700 opacity-50 cursor-not-allowed` : ``}`}
 					>
 						+ Add Tenant
 					</Button>
@@ -437,7 +437,7 @@ export default function Tenants() {
 													{tenant?.personal_information?.full_name}
 												</h3>
 												<p className='text-gray-500 text-xs'>
-													{tenant?.unit?.unit_name}
+													{tenant?.unitRelation?.unit_name}
 												</p>
 											</div>
 										</div>

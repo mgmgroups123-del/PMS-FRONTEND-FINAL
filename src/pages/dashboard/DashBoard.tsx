@@ -25,6 +25,9 @@ import { getallactivity } from "../../features/settings/service";
 export interface PropertyTotal {
   _id: string;
   count: number;
+  _count: {
+    property_type: number
+}
 }
 
 export interface OccupancyGraph {
@@ -107,7 +110,7 @@ const DashBoard = () => {
 
   const totalProperties =
     dashboardData?.PropertiesTotal?.reduce(
-      (sum: number, property: PropertyTotal) => sum + (property.count || 0),
+      (sum: number, property: any) => sum + (property._count?.property_type || 0),
       0
     ) || 0;
 
@@ -130,10 +133,10 @@ const DashBoard = () => {
 
     dashboardData?.paymentStatusBreakdownGraph?.forEach((item: any) => {
       const key =
-        item._id.toLowerCase() === "overdue"
+        item?.status?.toLowerCase() === "overdue"
           ? "Overdue"
-          : item._id.charAt(0).toUpperCase() + item._id.slice(1);
-      statusMap[key] = (statusMap[key] || 0) + item.count;
+          : item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1);
+      statusMap[key] = (statusMap[key] || 0) + item?._count?.status;
     });
 
     return Object.entries(statusMap).map(([name, value], index) => ({
@@ -337,10 +340,10 @@ const DashBoard = () => {
         />
         <PropertyTypesDistribution
           data={
-            dashboardData?.PropertiesTotal?.map((property, index) => ({
+            dashboardData?.PropertiesTotal?.map((property:any, index) => ({
               name:
-                property._id.charAt(0).toUpperCase() + property._id.slice(1),
-              value: property.count,
+                property?.property_type?.charAt(0).toUpperCase() + property?.property_type?.slice(1),
+              value: property?._count?.property_type,
               color: ["#06B6D4", "#EC4899", "#EF4444", "#8B5CF6", "#FACC15"][
                 index % 5
               ],
