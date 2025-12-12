@@ -86,16 +86,16 @@ export default function EditTenantForm({
 				phoneNumber: tenant?.personal_information?.phone || '',
 				unit: tenant?.unitRelation?.id || '',
 				propertytype: tenant?.unitRelation?.property?.property_type || '',
-				propertyName: tenant?.unitRelation?.property?.uuid || '',
+				propertyName: tenant?.unitRelation?.property?.property_name || '--',
 				tenantType: tenant?.tenant_type || '',
-				propertyInformation: tenant?.unitRelation?.unit_address || '',
+				propertyInformation: tenant?.unitRelation?.unit_name || '',
 				rent: tenant?.financial_information?.rent || '',
 				securityDeposit: tenant?.deposit || '',
 				hasGst: tenant?.hasGST,
 				cgst: tenant?.financial_information?.cgst || '9',
 				sgst: tenant?.financial_information?.sgst || '9',
 				tds: tenant?.financial_information?.tds || '-10',
-				maintanance: tenant?.financial_information?.maintenance || '',
+				maintanance: tenant?.financial_information?.maintenance || '--',
 				totalmonthlyrent: calculateInitialTotal(
 					tenant?.financial_information?.rent,
 					tenant?.financial_information?.maintenance,
@@ -126,6 +126,8 @@ export default function EditTenantForm({
 			setSelectedPropertyId(tenant?.unit?.propertyId?.uuid || '');
 		}
 	}, [tenant]);
+
+	console.log("FormData", tenant)
 
 	const calculateInitialTotal = (
 		rent: string,

@@ -110,7 +110,7 @@ const DashBoard = () => {
 
   const totalProperties =
     dashboardData?.PropertiesTotal?.reduce(
-      (sum: number, property: any) => sum + (property._count?.property_type || 0),
+      (sum: number, property: any) => sum + (property._count || 0),
       0
     ) || 0;
 
@@ -125,7 +125,7 @@ const DashBoard = () => {
   const processedOccupancyGraph =
     dashboardData?.occupancyGraph?.map((item: OccupancyGraph) => ({
       ...item,
-      occupancyRate: Number(item.occupancyRate.toFixed(1)),
+      occupancyRate: Number(item?.occupancyRate),
     })) || [];
 
   const mergedPaymentStatus = (() => {
@@ -136,7 +136,7 @@ const DashBoard = () => {
         item?.status?.toLowerCase() === "overdue"
           ? "Overdue"
           : item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1);
-      statusMap[key] = (statusMap[key] || 0) + item?._count?.status;
+      statusMap[key] = (statusMap[key] || 0) + item?._count;
     });
 
     return Object.entries(statusMap).map(([name, value], index) => ({
@@ -343,7 +343,7 @@ const DashBoard = () => {
             dashboardData?.PropertiesTotal?.map((property:any, index) => ({
               name:
                 property?.property_type?.charAt(0).toUpperCase() + property?.property_type?.slice(1),
-              value: property?._count?.property_type,
+              value: property?._count,
               color: ["#06B6D4", "#EC4899", "#EF4444", "#8B5CF6", "#FACC15"][
                 index % 5
               ],

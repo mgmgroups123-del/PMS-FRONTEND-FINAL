@@ -165,8 +165,8 @@ function LeaseManagement() {
       phone: personalInfo?.phone,
       address: personalInfo?.address,
 
-      propertyType: unit?.unit_type || "Not Available",
-      propertyName: unit?.land_name || "Not Available",
+      propertyType: unit?.property?.property_type || "Not Available",
+      propertyName: unit?.property?.property_name || unit?.land?.land_name,
 
       paymentStatus: "Not Available",
 
