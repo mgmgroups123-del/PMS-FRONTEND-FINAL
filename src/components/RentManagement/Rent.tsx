@@ -342,7 +342,7 @@ const Rent: React.FC = () => {
       setEditableData({
         full_name: selectedRent?.tenantName || "",
         rent: selectedRent.currentMonth?.amount || 0,
-        maintenance: selectedRent?.currentMonth.maintenance || selectedRent?.previousMonth.maintenance,
+        maintenance: selectedRent?.currentMonth?.maintenance || selectedRent?.previousMonth?.maintenance,
         cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
         sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
         tds: selectedRent?.currentMonth?.tds || selectedRent?.previousMonth?.tds,
@@ -445,6 +445,7 @@ const Rent: React.FC = () => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, endIndex);
+  console.log("Paginated Data", paginatedData)
 
   useEffect(() => {
     setCurrentPage(1);
@@ -762,21 +763,21 @@ const Rent: React.FC = () => {
                   <td className="px-6 py-4 flex rounded-l-lg text-lg border-l border-t border-b border-gray-200">
                     <span
                       className={`rounded p-2 flex items-center justify-center ${getStatusStyle(
-                        item.currentMonth.status
+                        item.currentMonth?.status
                       )}`}
                     >
                       <BiSolidBuildings className="text-2xl" />
                     </span>
                     <div className="grid ml-3">
                       <span className="font-bold text-black">
-                        {item.tenantName || "N/A"}
+                        {item?.tenantName || "N/A"}
                       </span>
                       <span className="text-sm">{item.floor || "N/A"}</span>
                     </div>
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.currentMonth.amount || "0"}
+                    ₹{item.currentMonth?.amount || "0"}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
