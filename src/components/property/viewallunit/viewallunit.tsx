@@ -42,7 +42,7 @@ const ViewAllUnits = () => {
       setIsDeleteModalOpen(false);
       setSelectedUnit(null);
     } catch (error) {
-      toast.error("Failed to delete unit. Please try again.");
+      console.error(error)
     } finally {
       setIsDeleting(false);
     }
