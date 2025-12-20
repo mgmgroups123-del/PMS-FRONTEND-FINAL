@@ -1,1 +1,0 @@
-export const selectProfile = (state: any) => state?.SettingsProfileSlice?.data;

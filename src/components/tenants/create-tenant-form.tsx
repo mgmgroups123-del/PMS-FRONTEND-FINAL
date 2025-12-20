@@ -23,11 +23,6 @@ import {
 } from '../../features/tenants/services';
 import toast from 'react-hot-toast';
 import {
-	Heart,
-	HelpCircle,
-	Smile,
-	UserRound,
-	UsersRound,
 	X,
 } from 'lucide-react';
 import { GetByIdLandService, GetLandsDetails } from '../../features/lands/service';

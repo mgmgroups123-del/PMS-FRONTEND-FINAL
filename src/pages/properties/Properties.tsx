@@ -168,7 +168,7 @@ function Properties() {
   };
 
   const mappedProperties: Property[] =
-    properties?.map((p: any, index: number) => ({
+    properties?.map((p: any) => ({
       id: p.id,
       name: p.property_name,
       location: p.property_address || p.owner_information?.address || "",

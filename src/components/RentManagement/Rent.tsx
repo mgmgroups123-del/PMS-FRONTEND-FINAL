@@ -16,38 +16,38 @@ import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk
 import { patchTenants } from "../../features/tenants/services";
 import dayjs from "dayjs";
 
-interface PersonalInformation {
-  full_name: string;
-  email: string;
-  phone: string;
-  address: string;
-}
+// interface PersonalInformation {
+//   full_name: string;
+//   email: string;
+//   phone: string;
+//   address: string;
+// }
 
-interface Tenant {
-  deposit: string;
-  lease_duration: any;
-  personal_information: PersonalInformation;
-  rent: string;
-  unit: any
-  unit_number: number;
-  security_deposit: string;
-  lease_start_date: string;
-  lease_end_date: string;
-  emergency_contact: string;
-  financial_information: any;
-  uuid: string
-}
+// interface Tenant {
+//   deposit: string;
+//   lease_duration: any;
+//   personal_information: PersonalInformation;
+//   rent: string;
+//   unit: any
+//   unit_number: number;
+//   security_deposit: string;
+//   lease_start_date: string;
+//   lease_end_date: string;
+//   emergency_contact: string;
+//   financial_information: any;
+//   uuid: string
+// }
 
-interface RentItem {
-  tenant: any;
-  uuid: string;
-  tenantId: Tenant;
-  paymentDueDay: string;
-  status: string;
-  bankDetails: string;
-  previousMonthDue?: number;
-  previousMonthStatus?: string;
-}
+// interface RentItem {
+//   tenant: any;
+//   uuid: string;
+//   tenantId: Tenant;
+//   paymentDueDay: string;
+//   status: string;
+//   bankDetails: string;
+//   previousMonthDue?: number;
+//   previousMonthStatus?: string;
+// }
 
 // New interface for backend response structure
 interface CombinedRentItem {

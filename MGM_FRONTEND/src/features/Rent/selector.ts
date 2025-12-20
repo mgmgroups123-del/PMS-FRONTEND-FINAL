@@ -1,1 +1,0 @@
-export const getRent = (state: any) => state.rentReducer.data;
