@@ -75,7 +75,7 @@ interface Property {
 
 interface Unit {
   id?: string;
-  property: string;
+  property: any;
   propertyId?: string;
   propertyUuid?: string;
   name: string;
@@ -1136,16 +1136,16 @@ function Properties() {
                       Property <span className="text-red-500">*</span>
                     </label>
                     <Select
-                      value={unitForm.property}
+                      value={unitForm.propertyId}
                       onValueChange={(value) => {
                         const selectedProp = mappedProperties.find(
-                          (p) => p.name === value
+                          (p) => p.id === value
                         );
                         setUnitForm({
                           ...unitForm,
-                          property: value,
+                          property: selectedProp?.name,
                           propertyUuid: selectedProp?.uuid || "",
-                          propertyId: selectedProp?.id || "",
+                          propertyId: value || "",
                         });
                       }}
                     >
@@ -1156,7 +1156,7 @@ function Properties() {
                         {mappedProperties.map((property) => (
                           <SelectItem
                             key={property.id}
-                            value={property.name}
+                            value={property.id}
                             className="text-[#7D7D7D] hover:bg-[#ed3237] hover:text-white"
                           >
                             {property.name}

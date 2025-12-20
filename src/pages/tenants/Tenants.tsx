@@ -609,7 +609,7 @@ export default function Tenants() {
 										</div>
 									</div>
 
-									<div className='mb-4 bg-white border border-gray-100 shadow-sm px-4 py-2 rounded-xl'>
+									{/* <div className='mb-4 bg-white border border-gray-100 shadow-sm px-4 py-2 rounded-xl'>
 										<p className='text-[#ee2f2f] text-lg font-medium mb-1'>
 											Emergency
 										</p>
@@ -621,7 +621,7 @@ export default function Tenants() {
 												{tenant.emergency_contact.phone}
 											</p>
 										</div>
-									</div>
+									</div> */}
 
 									<Button
 										onClick={() => handleViewTenant(tenant)}

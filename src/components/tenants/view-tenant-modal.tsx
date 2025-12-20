@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSingleTenantData } from '../../features/tenants/reducers/Thunks';
 import { singleTenantSelector } from '../../features/tenants/reducers/Selector';
+import dayjs from 'dayjs';
 
 export interface Tenant {
 	id: string;
@@ -238,13 +239,13 @@ export default function ViewTenantModal({
 								<div className='space-y-2'>
 									<Label>{singleTenantData?.tenant_type === 'rent' ? 'Rent Start Date' : 'Lease Start Date'}</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.lease_duration?.start_date.split('T')[0]}
+										{dayjs(singleTenantData?.lease_duration?.start_date).format('DD-MM-YYYY')}
 									</div>
 								</div>
 								<div className='space-y-2'>
 									<Label>{singleTenantData?.tenant_type === 'rent' ? 'Rent End Date' : 'Lease End Date'}</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.lease_duration?.end_date.split('T')[0]}
+										{dayjs(singleTenantData?.lease_duration?.end_date).format('DD-MM-YYYY')}
 									</div>
 								</div>
 								{singleTenantData?.tenant_type === 'rent' && (<div className='space-y-2'>
@@ -253,7 +254,7 @@ export default function ViewTenantModal({
 										{singleTenantData?.lease_duration?.due_date}
 									</div>
 								</div>)}
-								<div className='space-y-2'>
+								{/* <div className='space-y-2'>
 									<Label>Emergency Contact Name</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.emergency_contact?.name}
@@ -270,7 +271,7 @@ export default function ViewTenantModal({
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										{singleTenantData?.emergency_contact?.relation}
 									</div>
-								</div>
+								</div> */}
 							</CardContent>
 						</Card>
 

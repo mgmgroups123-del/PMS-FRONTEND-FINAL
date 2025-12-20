@@ -348,7 +348,7 @@ const Maintenance = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {currentItems?.length > 0 ? (
-          currentItems.map((item) => (
+          currentItems.map((item: any) => (
             <div key={item.id} className="bg-white rounded-xl shadow-xl overflow-hidden border">
 
               <div className="p-4 flex items-start justify-between text-white bg-red-700">
@@ -360,7 +360,7 @@ const Maintenance = () => {
                     </h2>
                     <p style={FONTS.chart_legend} className="text-sm">
                       {item.full_name || "no data available"} •
-                      {typeof item.unitId === "string" ? item?.Unit.unit_name : item.unitId?.unit_name || "no unit"}
+                      {typeof item.unitId === "string" ? item?.unit?.unit_name : item.unitId?.unit_name || "no unit"}
                     </p>
                   </div>
                 </div>
@@ -573,7 +573,7 @@ const Maintenance = () => {
                   <option value="">Property Name</option>
                   {propertyTypes
                     .filter((item) => item.property_type === formData.property_type)
-                    .map((item) => (
+                    .map((item: any) => (
                       <option key={item.id} value={item.uuid}>
                         {item.property_name}
                       </option>
@@ -592,7 +592,7 @@ const Maintenance = () => {
                   disabled={!formData.propertyId}
                 >
                   <option value="">Select Unit</option>
-                  {units.map((unit) => (
+                  {units.map((unit: any) => (
                     <option key={unit.id} value={unit.id}>
                       {unit.unit_name}
                     </option>

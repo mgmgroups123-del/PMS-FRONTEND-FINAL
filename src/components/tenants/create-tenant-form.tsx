@@ -56,9 +56,6 @@ export interface TenantFormData {
 	teamSpecialized: string;
 	leaseStartDate: string;
 	leaseEndDate: string;
-	contactName: string;
-	contactPhone: string;
-	relationship: string;
 	bankName: string;
 	accountNumber: string;
 	branch: string;
@@ -100,9 +97,6 @@ export default function
 		teamSpecialized: '',
 		leaseStartDate: '',
 		leaseEndDate: '',
-		contactName: '',
-		contactPhone: '',
-		relationship: '',
 		bankName: '',
 		accountNumber: '',
 		branch: '',
@@ -148,14 +142,6 @@ export default function
 			case 'tenantType':
 				if (!value.trim()) error = 'Tenant type is required';
 				break;
-			// case 'unit':
-			// 	if (!value.trim()) error = 'Unit is required';
-			// 	break;
-			// case 'rent':
-			// 	if (formData.tenantType === "rent" && !value.trim()) error = 'Rent amount is required';
-			// 	else if (isNaN(Number(value))) error = 'Rent must be a number';
-			// 	else if (Number(value) <= 0) error = 'Rent must be greater than 0';
-			// 	break;
 			case 'securityDeposit':
 				// Security deposit only required for lease type
 				if (formData.tenantType === 'lease' && !value.trim()) error = 'Security deposit is required';
@@ -164,22 +150,6 @@ export default function
 				else if (value.trim() && Number(value) < 0)
 					error = 'Security deposit cannot be negative';
 				break;
-			// case 'maintanance':
-			// 	if (!value.trim()) error = 'Maintenance charge is required';
-			// 	else if (isNaN(Number(value))) error = 'Maintenance must be a number';
-			// 	else if (Number(value) < 0) error = 'Maintenance cannot be negative';
-			// 	break;
-			// case 'cgst':
-			// case 'sgst':
-			// 	if (formData.hasGst && !value.trim())
-			// 		error = 'This field is required when GST is enabled';
-			// 	else if (isNaN(Number(value))) error = 'Must be a number';
-			// 	else if (Number(value) < 0) error = 'Cannot be negative';
-			// 	break;
-			// case 'tds':
-			// 	if (!value.trim()) error = 'TDS is required';
-			// 	else if (isNaN(Number(value))) error = 'TDS must be a number';
-			// 	break;
 			case 'leaseStartDate':
 			case 'leaseEndDate':
 				if (!value.trim()) error = 'This field is required';
@@ -194,26 +164,6 @@ export default function
 			case 'rentDueDate':
 				if (!value.trim()) error = 'Rent due date is required';
 				break;
-			case 'contactName':
-				if (!value.trim()) error = 'Contact name is required';
-				break;
-			case 'contactPhone':
-				if (!value.trim()) error = 'Contact phone is required';
-				else if (!/^[0-9]{10}$/.test(value))
-					error = 'Phone number must be 10 digits';
-				break;
-			// case 'bankName':
-			// 	if (!value.trim()) error = 'Bank name is required';
-			// 	break;
-			// case 'accountNumber':
-			// 	if (!value.trim()) error = 'Account number is required';
-			// 	else if (!/^[0-9]{9,18}$/.test(value)) error = 'Invalid account number';
-			// 	break;
-			// case 'ifscNumber':
-			// 	if (!value.trim()) error = 'IFSC code is required';
-			// 	else if (!/^[A-Za-z]{4}0[A-Z0-9a-z]{6}$/.test(value))
-			// 		error = 'Invalid IFSC format';
-			// 	break;
 			default:
 				break;
 		}
@@ -271,9 +221,6 @@ export default function
 	const calculateTotalRent = () => {
 		const basicRent = parseFloat(formData.rent) || 0;
 		const maintenance = parseFloat(formData.maintanance) || 0;
-		// const cgstPercentage = parseFloat(formData.cgst) || 0;
-		// const sgstPercentage = parseFloat(formData.sgst) || 0;
-		// const tdsPercentage = parseFloat(formData.tds) || 0;
 		const deposit = parseFloat(formData.securityDeposit) || 0;
 
 		let subtotal = 0;
@@ -281,11 +228,6 @@ export default function
 
 		if (formData.tenantType === 'rent' && formData.propertytype !== 'residency') {
 			const subtotalBeforeGST = basicRent + maintenance;
-			// const cgst = (subtotalBeforeGST * cgstPercentage) / 100;
-			// const sgst = (subtotalBeforeGST * sgstPercentage) / 100;
-			// const tds = (subtotalBeforeGST * Math.abs(tdsPercentage)) / 100;
-
-			// subtotal = subtotalBeforeGST + cgst + sgst;
 			total = subtotalBeforeGST;
 		} else if (formData.tenantType === 'lease') {
 			total = maintenance + deposit;
@@ -320,8 +262,6 @@ export default function
 			'propertytype',
 			'propertyName',
 			'tenantType',
-			'contactName',
-			'contactPhone',
 			'bankName',
 			'accountNumber',
 			'ifscNumber'
@@ -388,11 +328,6 @@ export default function
 						: null,
 					due_date: formData.rentDueDate
 				},
-				emergency_contact: {
-					name: formData.contactName,
-					phone: formData.contactPhone,
-					relation: formData.relationship,
-				},
 				tenant_type: formData.tenantType,
 				unit_type: selectedProperty === "land" ? "land" : "unit",
 				unit: selectedProperty === "land" ? landId : formData.unit,
@@ -411,12 +346,6 @@ export default function
 					}),
 					maintenance: Number(formData.maintanance),
 				},
-				// bank_details: {
-				// 	bank_name: formData.bankName,
-				// 	account_number: formData.accountNumber,
-				// 	bank_branch: formData.branch,
-				// 	bank_IFSC: formData.ifscNumber,
-				// },
 			};
 
 			const response = await createTenants(payload);
@@ -446,9 +375,6 @@ export default function
 					teamSpecialized: '',
 					leaseStartDate: '',
 					leaseEndDate: '',
-					contactName: '',
-					contactPhone: '',
-					relationship: '',
 					bankName: '',
 					accountNumber: '',
 					branch: '',
@@ -489,9 +415,6 @@ export default function
 			teamSpecialized: '',
 			leaseStartDate: '',
 			leaseEndDate: '',
-			contactName: '',
-			contactPhone: '',
-			relationship: '',
 			bankName: '',
 			accountNumber: '',
 			branch: '',
@@ -787,7 +710,8 @@ export default function
 														<SelectItem
 															key={unit.id}
 															value={unit.id}
-															className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.unit === unit.id
+															disabled={unit.status === 'occupied'}
+															className={`hover:bg-[#ed3237] cursor-pointer hover:text-white transition-colors mb-0.5 ${formData.unit === unit.id
 																? 'bg-[#ed3237] text-white'
 																: ''
 																}`}
@@ -872,24 +796,6 @@ export default function
 											</p>
 										)}
 									</div>)}
-
-									{/* <div className='space-y-2'>
-										<Label htmlFor='maintanance'>Maintenance Charge *</Label>
-										<Input
-											id='maintanance'
-											value={formData.maintanance}
-											onChange={(e) =>
-												handleInputChange('maintanance', e.target.value)
-											}
-											placeholder='Enter maintanance charge'
-											className={errors.maintanance ? 'border-red-500' : ''}
-										/>
-										{errors.maintanance && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.maintanance}
-											</p>
-										)}
-									</div> */}
 								</div>
 
 								{/* GST Section */}
@@ -1081,215 +987,6 @@ export default function
 								</div>
 							</CardContent>
 						</Card>
-
-						<Card>
-							<CardHeader className='bg-blue-50 rounded-t-lg'>
-								<CardTitle className='flex items-center gap-2 text-blue-700'>
-									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
-										4
-									</div>
-									Emergency Contact
-								</CardTitle>
-							</CardHeader>
-							<CardContent className='p-6 space-y-4'>
-								<div className='grid grid-cols-2 gap-4'>
-									<div className='space-y-2'>
-										<Label htmlFor='contactName'>Contact Name *</Label>
-										<Input
-											id='contactName'
-											value={formData.contactName}
-											onChange={(e) =>
-												handleInputChange('contactName', e.target.value)
-											}
-											placeholder='Enter contact name'
-											className={errors.contactName ? 'border-red-500' : ''}
-										/>
-										{errors.contactName && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.contactName}
-											</p>
-										)}
-									</div>
-									<div className='space-y-2'>
-										<Label htmlFor='contactPhone'>Contact Phone *</Label>
-										<Input
-											id='contactPhone'
-											value={formData.contactPhone}
-											onChange={(e) =>
-												handleInputChange('contactPhone', e.target.value)
-											}
-											placeholder='Enter contact phone'
-											className={errors.contactPhone ? 'border-red-500' : ''}
-										/>
-										{errors.contactPhone && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.contactPhone}
-											</p>
-										)}
-									</div>
-								</div>
-								<div className='space-y-2'>
-									<Label htmlFor='relationship'>Relationship</Label>
-									<Select
-										value={formData.relationship}
-										onValueChange={(value) =>
-											handleInputChange('relationship', value)
-										}
-									>
-										<SelectTrigger
-											className={`w-full ${errors.relationship
-												? 'border-red-500 focus:ring-red-500'
-												: 'border-gray-200 focus:ring-[#ed3237]'
-												} bg-white`}
-										>
-											<SelectValue placeholder='Select relationship' />
-										</SelectTrigger>
-										<SelectContent className='bg-white'>
-											<SelectItem
-												value='parent'
-												className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.relationship === 'parent'
-													? 'bg-[#ed3237] text-white'
-													: ''
-													}`}
-											>
-												<div className='flex items-center gap-2'>
-													<UserRound className='w-4 h-4' />{' '}
-													{/* Optional icon */}
-													<span>Parent</span>
-												</div>
-											</SelectItem>
-											<SelectItem
-												value='sibling'
-												className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.relationship === 'sibling'
-													? 'bg-[#ed3237] text-white'
-													: ''
-													}`}
-											>
-												<div className='flex items-center gap-2'>
-													<UsersRound className='w-4 h-4' />{' '}
-													{/* Optional icon */}
-													<span>Sibling</span>
-												</div>
-											</SelectItem>
-											<SelectItem
-												value='spouse'
-												className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.relationship === 'spouse'
-													? 'bg-[#ed3237] text-white'
-													: ''
-													}`}
-											>
-												<div className='flex items-center gap-2'>
-													<Heart className='w-4 h-4' /> {/* Optional icon */}
-													<span>Spouse</span>
-												</div>
-											</SelectItem>
-											<SelectItem
-												value='friend'
-												className={`hover:bg-[#ed3237] hover:text-white transition-colors mb-0.5 ${formData.relationship === 'friend'
-													? 'bg-[#ed3237] text-white'
-													: ''
-													}`}
-											>
-												<div className='flex items-center gap-2'>
-													<Smile className='w-4 h-4' /> {/* Optional icon */}
-													<span>Friend</span>
-												</div>
-											</SelectItem>
-											<SelectItem
-												value='other'
-												className={`hover:bg-[#ed3237] hover:text-white transition-colors ${formData.relationship === 'other'
-													? 'bg-[#ed3237] text-white'
-													: ''
-													}`}
-											>
-												<div className='flex items-center gap-2'>
-													<HelpCircle className='w-4 h-4' />{' '}
-													{/* Optional icon */}
-													<span>Other</span>
-												</div>
-											</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							</CardContent>
-						</Card>
-
-						{/* <Card>
-							<CardHeader className='bg-blue-50 rounded-t-lg'>
-								<CardTitle className='flex items-center gap-2 text-blue-700'>
-									<div className='w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold'>
-										5
-									</div>
-									Bank Details
-								</CardTitle>
-							</CardHeader>
-							<CardContent className='p-6 space-y-4'>
-								<div className='grid grid-cols-2 gap-4'>
-									<div className='space-y-2'>
-										<Label htmlFor='bankName'>Bank Name *</Label>
-										<Input
-											id='bankName'
-											value={formData.bankName}
-											onChange={(e) =>
-												handleInputChange('bankName', e.target.value)
-											}
-											placeholder='Enter Bank name'
-											className={errors.bankName ? 'border-red-500' : ''}
-										/>
-										{errors.bankName && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.bankName}
-											</p>
-										)}
-									</div>
-									<div className='space-y-2'>
-										<Label htmlFor='accountNumber'>Account Number *</Label>
-										<Input
-											id='accountNumber'
-											value={formData.accountNumber}
-											onChange={(e) =>
-												handleInputChange('accountNumber', e.target.value)
-											}
-											placeholder='Enter Account Number'
-											className={errors.accountNumber ? 'border-red-500' : ''}
-										/>
-										{errors.accountNumber && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.accountNumber}
-											</p>
-										)}
-									</div>
-									<div className='space-y-2'>
-										<Label htmlFor='branch'>Bank Branch</Label>
-										<Input
-											id='branch'
-											value={formData.branch}
-											onChange={(e) =>
-												handleInputChange('branch', e.target.value)
-											}
-											placeholder='Enter Branch name'
-										/>
-									</div>
-									<div className='space-y-2'>
-										<Label htmlFor='ifscNumber'>IFSC Code *</Label>
-										<Input
-											id='ifscNumber'
-											value={formData.ifscNumber}
-											onChange={(e) =>
-												handleInputChange('ifscNumber', e.target.value)
-											}
-											placeholder='Enter IFSC code'
-											className={errors.ifscNumber ? 'border-red-500' : ''}
-										/>
-										{errors.ifscNumber && (
-											<p className='text-red-500 text-xs mt-1'>
-												{errors.ifscNumber}
-											</p>
-										)}
-									</div>
-								</div>
-							</CardContent> 
-						</Card> */}
 
 						<div className='flex justify-between gap-4 pt-4'>
 							<Button
