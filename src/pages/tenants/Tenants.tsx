@@ -437,7 +437,7 @@ export default function Tenants() {
 													{tenant?.personal_information?.full_name}
 												</h3>
 												<p className='text-gray-500 text-xs'>
-													{tenant?.unitRelation?.unit_name}
+													{tenant?.unitRelation?.unit_name || tenant?.landRelation?.land_name}
 												</p>
 											</div>
 										</div>

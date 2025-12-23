@@ -142,7 +142,7 @@ export default function ViewTenantModal({
 								<div className='space-y-2'>
 									<Label>Property Name</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.unitRelation?.property?.property_name || singleTenantData?.unitRelation?.land_name}
+										{singleTenantData?.unitRelation?.property?.property_name || singleTenantData?.landRelation?.land_name}
 									</div>
 								</div>
 								<div className='space-y-2'>
@@ -155,13 +155,13 @@ export default function ViewTenantModal({
 								<div className='space-y-2'>
 									<Label>Unit</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.unitRelation?.unit_name || "--"}
+										{singleTenantData?.unitRelation?.unit_name || singleTenantData?.landRelation?.land_name}
 									</div>
 								</div>
 								<div className='space-y-2'>
 									<Label>Property Information</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{singleTenantData?.unitRelation?.unit_address || singleTenantData?.unitRelation?.land_address}
+										{singleTenantData?.unitRelation?.unit_address || singleTenantData?.landRelation?.land_address}
 									</div>
 								</div>
 							</CardContent>

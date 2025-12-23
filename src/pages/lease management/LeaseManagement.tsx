@@ -114,7 +114,8 @@ function LeaseManagement() {
   const transformedLeaseData: LeaseData[] = Leases.filter(
     (lease: any) => lease.id && lease.id !== null
   ).map((lease: any) => {
-    const unit = lease.unitRelation
+    const unit = lease?.unitRelation
+    const land = lease?.landRelation
     const personalInfo = lease.personal_information
     const leaseDuration = lease.lease_duration
 
@@ -145,7 +146,7 @@ function LeaseManagement() {
     return {
       id: lease.id || lease.uuid,
       name: personalInfo?.full_name || "No Name",
-      unit: `${unit?.unit_name || unit?.land_name || "N/A"}`,
+      unit: `${unit?.unit_name || land?.land_name || "N/A"}`,
       avatar: "",
       period,
       duration,
@@ -165,8 +166,8 @@ function LeaseManagement() {
       phone: personalInfo?.phone,
       address: personalInfo?.address,
 
-      propertyType: unit?.property?.property_type || "Not Available",
-      propertyName: unit?.property?.property_name || unit?.land?.land_name,
+      propertyType: unit?.property?.property_type || "Land",
+      propertyName: unit?.property?.property_name || land?.land_name,
 
       paymentStatus: "Not Available",
 

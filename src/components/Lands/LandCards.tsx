@@ -102,9 +102,9 @@ const LandCards: React.FC<Props> = ({
                             className="w-full h-56 rounded-xl object-cover"
                         />
                     </div>
-                    <Badge className='absolute top-3 right-3 bg-white text-[#ed3237] hover:bg-white/90'>
+                    {/* <Badge className='absolute top-3 right-3 bg-white text-[#ed3237] hover:bg-white/90'>
                         {property.acre} acre
-                    </Badge>
+                    </Badge> */}
                 </div>
 
                 <div className='p-1'>
@@ -122,9 +122,6 @@ const LandCards: React.FC<Props> = ({
                                 {property.land_address}
                             </p>
                         </div>
-                    </div>
-
-                    <div className='flex flex-row justify-between gap-4 mb-3 px-2'>
                         <div className='text-center flex items-center gap-2'>
                             <div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
                                 <img src={buildingBlue} alt='building' className='w-4 h-4' />
@@ -134,7 +131,19 @@ const LandCards: React.FC<Props> = ({
                                 <p className='text-[#006AFF] ml-1'>{property.square_feet}</p>
                             </div>
                         </div>
-                        <div className='text-center flex items-center gap-2'>
+                    </div>
+
+                    <div className='flex justify-center gap-4 mb-3 px-2'>
+                        {/* <div className='text-center flex items-center gap-2'>
+                            <div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
+                                <img src={buildingBlue} alt='building' className='w-4 h-4' />
+                            </div>
+                            <div className='flex flex-col items-start'>
+                                <p className='font-semibold text-[#716F6F]'>Square Feet</p>
+                                <p className='text-[#006AFF] ml-1'>{property.square_feet}</p>
+                            </div>
+                        </div> */}
+                        {/* <div className='text-center flex items-center gap-2'>
                             <div className='mb-1 bg-[#1EC95A26] p-2 rounded-full'>
                                 <img src={buildingGreen} alt='building' className='w-4 h-4' />
                             </div>
@@ -142,8 +151,8 @@ const LandCards: React.FC<Props> = ({
                                 <p className='font-semibold text-[#716F6F]'>Cent</p>
                                 <p className='text-[#1EC95A] ml-1'>{property.cent}</p>
                             </div>
-                        </div>
-                        <div className='text-center flex items-center gap-2'>
+                        </div> */}
+                        {/* <div className='text-center flex items-center gap-2'>
                             <div className='mb-1 bg-[#FF00E126] p-2 rounded-full'>
                                 <img src={buildingPink} alt='building' className='w-4 h-4' />
                             </div>
@@ -151,7 +160,7 @@ const LandCards: React.FC<Props> = ({
                                 <p className='font-semibold text-[#716F6F]'>Acre</p>
                                 <p className='text-[#FF00E1] ml-1'>{property.acre}</p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     <Button

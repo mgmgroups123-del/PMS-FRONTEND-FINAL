@@ -17,8 +17,8 @@ import { getImageUrl } from '../../utils/getImage'
 export type LandsDetailsForm = {
   land_name: string;
   square_feet: string;
-  acre: string;
-  cent: string;
+  // acre: string;
+  // cent: string;
   land_address: string;
   owner_full_name: string;
   owner_email: string;
@@ -48,8 +48,8 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
   const [formData, setFormData] = useState<LandsDetailsForm>({
     land_name: "",
     square_feet: "",
-    acre: "",
-    cent: "",
+    // acre: "",
+    // cent: "",
     land_address: "",
     image: "",
     owner_full_name: "",
@@ -63,8 +63,8 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
       setFormData({
         land_name: selectedProperty.land_name || "",
         square_feet: selectedProperty.square_feet || "",
-        acre: selectedProperty.acre || "",
-        cent: selectedProperty.cent || "",
+        // acre: selectedProperty.acre || "",
+        // cent: selectedProperty.cent || "",
         land_address: selectedProperty.land_address || "",
         image: getImageUrl(selectedProperty?.image) || "",
         owner_full_name: selectedProperty.owner_information?.full_name || "",
@@ -82,8 +82,8 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
       setFormData({
         land_name: "",
         square_feet: "",
-        acre: "",
-        cent: "",
+        // acre: "",
+        // cent: "",
         land_address: "",
         image: "",
         owner_full_name: "",
@@ -125,7 +125,7 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
   };
 
   const handleSubmit = async () => {
-    if (!formData.land_name || !formData.acre || !formData.land_address || !formData.owner_full_name || !formData.owner_phone) {
+    if (!formData.land_name || !formData.land_address || !formData.owner_full_name || !formData.owner_phone) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -133,8 +133,6 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
     const data = {
       land_name: formData.land_name,
       square_feet: formData.square_feet,
-      acre: formData.acre,
-      cent: formData.cent,
       land_address: formData.land_address,
       owner_information: {
         full_name: formData.owner_full_name,
@@ -162,8 +160,8 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
       setFormData({
         land_name: "",
         square_feet: "",
-        acre: "",
-        cent: "",
+        // acre: "",
+        // cent: "",
         land_address: "",
         image: "",
         owner_full_name: "",
@@ -285,7 +283,7 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
                   required
                 />
               </div>
-              <div className='space-y-2'>
+              {/* <div className='space-y-2'>
                 <label className='text-sm font-medium text-[#7D7D7D]'>
                   Acre <span className='text-red-500'>*</span>
                 </label>
@@ -297,11 +295,11 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
                   disabled={modalMode === 'view'}
                   required
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className='grid grid-cols-2 gap-4'>
-              <div className='space-y-2'>
+              {/* <div className='space-y-2'>
                 <label className='text-sm font-medium text-[#7D7D7D]'>
                   Cent
                 </label>
@@ -312,7 +310,7 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
                   className='bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'
                   disabled={modalMode === 'view'}
                 />
-              </div>
+              </div> */}
               <div className='space-y-2'>
                 <label className='text-sm font-medium text-[#7D7D7D]'>
                   Square Feet

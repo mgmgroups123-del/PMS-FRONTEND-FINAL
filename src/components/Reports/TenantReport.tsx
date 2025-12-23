@@ -298,7 +298,7 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
                     <span>{formatDate(tenant.lease_duration.end_date)}</span>
                   </div>
                   <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
-                    {tenant.unitRelation?.unit_name || "N/A"}
+                    {tenant.unitRelation?.unit_name || tenant?.landRelation?.land_name}
                   </p>
                   <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">
                     ₹{Number(tenant.rent).toLocaleString()}

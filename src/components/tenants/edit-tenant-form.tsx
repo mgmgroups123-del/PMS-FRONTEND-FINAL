@@ -26,6 +26,7 @@ import {
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk';
+import { GetByIdLandService, GetLandsDetails } from '../../features/lands/service';
 
 interface EditTenantFormProps {
 	isOpen: boolean;
@@ -81,16 +82,16 @@ export default function EditTenantForm({
 		if (tenant) {
 			const tenantData = tenant;
 			console.log("Tenant data for editing:", tenantData);
-			
+
 			// Extract property type from unitRelation
-			const propertyType = tenantData?.unitRelation?.property?.property_type || '';
-			
+			const propertyType = tenantData?.unitRelation?.property?.property_type || "land";
+
 			// Extract property ID (uuid) from unitRelation
-			const propertyId = tenantData?.unitRelation?.property?.uuid || '';
-			
+			const propertyId = tenantData?.unitRelation?.property?.uuid || tenantData?.landRelation?.uuid;
+
 			// Extract property name from unitRelation
 			// const propertyName = tenantData?.unitRelation?.property?.property_name || '';
-			
+
 			// Set form data
 			setFormData({
 				fullName: tenantData?.personal_information?.full_name || '',
@@ -101,7 +102,7 @@ export default function EditTenantForm({
 				propertytype: propertyType,
 				propertyName: propertyId, // Store property ID for Select value
 				tenantType: tenantData?.tenant_type || '',
-				propertyInformation: tenantData?.unitRelation?.unit_name || '',
+				propertyInformation: tenantData?.unitRelation?.unit_name || tenantData?.landRelation?.land_name,
 				rent: tenantData?.financial_information?.rent || '',
 				securityDeposit: tenantData?.deposit?.toString() || '',
 				hasGst: tenantData?.hasGST || false,
@@ -137,12 +138,14 @@ export default function EditTenantForm({
 
 	const getUnit = async () => {
 		if (!selectedPropertyId) return;
-		
+
 		try {
 			const data = { uuid: selectedPropertyId };
-			const response = await getPropertyByIdData(data);
-			if (response?.data) {
-				setUnitData(response.data);
+			if (tenant?.unit_type === 'unit') {
+				const response = await getPropertyByIdData(data);
+				if (response?.data) {
+					setUnitData(response.data);
+				}
 			}
 		} catch (error) {
 			console.error('Error fetching units:', error);
@@ -150,14 +153,24 @@ export default function EditTenantForm({
 		}
 	};
 
+	console.log(tenant, "tenantttss")
+
 	const getProperty = async () => {
 		if (!selectedProperty) return;
-		
+
 		try {
-			const data = { property_type: selectedProperty };
-			const response = await getPropertyData(data);
-			if (response?.data) {
-				setCommercial(response.data);
+			if (tenant?.unit_type === 'unit') {
+				const data = { property_type: selectedProperty };
+				const response = await getPropertyData(data);
+				if (response?.data) {
+					setCommercial(response?.data);
+				}
+			} else if (tenant?.unit_type === 'land') {
+				const response = await GetLandsDetails();
+				console.log("Rsponse", response)
+				if (response?.data) {
+					setCommercial(response?.data)
+				}
 			}
 		} catch (error) {
 			console.error('Error fetching properties:', error);
@@ -257,7 +270,7 @@ export default function EditTenantForm({
 				uuid: tenant?.uuid,
 				data: payload,
 			});
-			
+
 			if (response) {
 				toast.success('Tenant updated successfully!');
 				fetchTenants();
@@ -276,6 +289,8 @@ export default function EditTenantForm({
 	};
 
 	if (!isOpen || !tenant) return null;
+
+	console.log("Commercial", commercial)
 
 	return (
 		<>
@@ -407,7 +422,7 @@ export default function EditTenantForm({
 											<SelectContent className='bg-white'>
 												{commercial?.map((c: any) => (
 													<SelectItem value={`${c?.uuid}`} key={c?.uuid}>
-														{c?.property_name}
+														{c?.property_name || c?.land_name}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -440,7 +455,7 @@ export default function EditTenantForm({
 											</SelectContent>
 										</Select>
 									</div>
-									<div className='space-y-2'>
+									{tenant?.unit_type === 'unit' ? (<div className='space-y-2'>
 										<Label htmlFor='unit'>Unit</Label>
 										<Select
 											value={formData.unit}
@@ -460,7 +475,7 @@ export default function EditTenantForm({
 												))}
 											</SelectContent>
 										</Select>
-									</div>
+									</div>) : <></>}
 								</div>
 							</CardContent>
 						</Card>
@@ -488,7 +503,7 @@ export default function EditTenantForm({
 											type='number'
 										/>
 									</div>
-									
+
 									{formData.tenantType === 'rent' && (
 										<>
 											<div className='space-y-2'>
@@ -592,7 +607,7 @@ export default function EditTenantForm({
 										)} */}
 									</div>
 								)}
-								
+
 								{/* Manual total rent input */}
 								{formData.tenantType === 'rent' && (
 									<div className='space-y-2'>
@@ -741,7 +756,7 @@ export default function EditTenantForm({
 								type='button'
 								onClick={handleSubmit}
 								className='px-6 hover:bg-[#ed3237] bg-red-700 text-white'
-								disabled={!formData.fullName || !formData.emailAddress || !formData.phoneNumber || 
+								disabled={!formData.fullName || !formData.emailAddress || !formData.phoneNumber ||
 									(formData.tenantType === 'rent' && (!formData.totalmonthlyrent || parseFloat(formData.totalmonthlyrent) <= 0))}
 							>
 								Update Tenant

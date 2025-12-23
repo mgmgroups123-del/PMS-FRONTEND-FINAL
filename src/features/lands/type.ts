@@ -2,8 +2,8 @@
 export type LandsDetails = {
     land_name: string;
     square_feet: string;
-    acre: string;
-    cent: string,
+    // acre: string;
+    // cent: string,
     land_address: string,
     owner_information: {
         full_name: string,
