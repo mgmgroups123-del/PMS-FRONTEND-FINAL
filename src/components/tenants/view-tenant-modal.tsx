@@ -239,13 +239,13 @@ export default function ViewTenantModal({
 								<div className='space-y-2'>
 									<Label>{singleTenantData?.tenant_type === 'rent' ? 'Rent Start Date' : 'Lease Start Date'}</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{dayjs(singleTenantData?.lease_duration?.start_date).format('DD-MM-YYYY')}
+										{dayjs(singleTenantData?.lease_duration?.start_date).format('DD-MM-YYYY') || 'N/A'}
 									</div>
 								</div>
 								<div className='space-y-2'>
 									<Label>{singleTenantData?.tenant_type === 'rent' ? 'Rent End Date' : 'Lease End Date'}</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
-										{dayjs(singleTenantData?.lease_duration?.end_date).format('DD-MM-YYYY')}
+										{dayjs(singleTenantData?.lease_duration?.end_date).format('DD-MM-YYYY') || 'N/A'}
 									</div>
 								</div>
 								{singleTenantData?.tenant_type === 'rent' && (<div className='space-y-2'>

@@ -39,6 +39,7 @@ interface RentCollectionGraph {
   yearly: {
     exp: number;
     rev: number;
+    pending: number;
   };
 }
 
@@ -79,6 +80,7 @@ interface DashboardData {
   paymentStatusBreakdownGraph: any[];
   rentCollectionGraph: RentCollectionGraph;   
   maintenanceExpenseGraph: MaintenanceExpenseGraph[];
+  LandsTotal: any;
 }
 
 interface DashboardState {

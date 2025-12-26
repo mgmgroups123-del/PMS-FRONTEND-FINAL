@@ -423,8 +423,10 @@ const Rent: React.FC = () => {
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
 
+      console.log("item Renr", item)
+
       const matchesStatus =
-        statusFilter === "All Status" ? true : item.currentMonth.status === statusFilter;
+        statusFilter === "All Status" ? true : item?.currentMonth?.status === statusFilter;
 
       // Month and Year filtering
       let matchesMonthYear = true;

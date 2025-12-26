@@ -153,6 +153,7 @@ const LandView: React.FC<Props> = ({ openViewModal, setOpenViewModal, modalMode,
         toast.success(`${formData.land_name} details updated`);
       } else {
         await dispatch(CreateLandsThunks(data));
+        await dispatch(GetLandsDetailsThunks());
         toast.success('New land added successfully!');
       }
 

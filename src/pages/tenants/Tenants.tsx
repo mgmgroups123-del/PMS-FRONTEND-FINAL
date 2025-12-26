@@ -584,21 +584,21 @@ export default function Tenants() {
 
 										<div className='flex justify-between items-center mb-2'>
 											<p className='text-lg font-bold text-gray-700'>
-												{new Date(
+												{tenant.lease_duration.start_date? new Date(
 													tenant.lease_duration.start_date
-												).toLocaleDateString('en-US', {
+												).toLocaleDateString('en-IN', {
 													month: 'short',
 													day: 'numeric',
 													year: 'numeric',
-												})}{' '}
+												}):'N/A'}{' '}
 												-{' '}
-												{new Date(
+												{tenant?.lease_duration?.end_date ? new Date(
 													tenant?.lease_duration?.end_date
-												).toLocaleDateString('en-US', {
+												).toLocaleDateString('en-IN', {
 													month: 'short',
 													day: 'numeric',
 													year: 'numeric',
-												})}
+												}) : 'N/A'}
 											</p>
 											<p className='text-xl font-bold text-[#e1ee2f] mt-1'>{tenant?.lease_duration?.due_date}</p>
 											<p className='text-xl font-bold text-[#ee2f2f] mt-1'>

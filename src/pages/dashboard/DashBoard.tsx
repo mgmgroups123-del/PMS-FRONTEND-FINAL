@@ -27,7 +27,7 @@ export interface PropertyTotal {
   count: number;
   _count: {
     property_type: number
-}
+  }
 }
 
 export interface OccupancyGraph {
@@ -45,12 +45,14 @@ export interface RentCollectionMonthly {
   [month: string]: {
     exp: number;
     rev: number;
+    pending: number;
   };
 }
 
 export interface RentCollectionYearly {
   exp: number;
   rev: number;
+  pending: number;
 }
 
 export interface RentCollectionGraph {
@@ -74,6 +76,7 @@ export interface DashboardData {
   occupancyGraph: OccupancyGraph[];
   paymentStatusBreakdownGraph: any[];
   rentCollectionGraph: RentCollectionGraph;
+  LandsTotal: any;
 }
 
 export interface DashboardApiResponse {
@@ -167,13 +170,12 @@ const DashBoard = () => {
       return [];
     }
 
-    const monthlyData = dashboardData.rentCollectionGraph.monthly;
+    const monthlyData = dashboardData?.rentCollectionGraph.monthly;
     return Object.entries(monthlyData).map(([monthKey, values]) => {
-      const { exp, rev } = values as { exp: number; rev: number };
+      const { rev, pending } = values as { exp: number; rev: number, pending: number };
       const monthName = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
       const paid = rev || 0;
-      const totalExpected = exp || 0;
-      const pending = Math.max(totalExpected - paid, 0);
+      // const totalExpected = exp || 0;
       return { month: monthName, paid, pending };
     });
   })();
@@ -188,12 +190,13 @@ const DashBoard = () => {
 
     const monthlyData = dashboardData.rentCollectionGraph.monthly;
     return Object.entries(monthlyData).map(([monthKey, values]) => {
-      const { exp, rev } = values as { exp: number; rev: number };
+      const { exp, rev, pending } = values as { exp: number; rev: number, pending: number };
       return {
         month: monthKey.charAt(0).toUpperCase() + monthKey.slice(1),
         year: new Date().getFullYear(),
         revenue: rev || 0,
         expenses: exp || 0,
+        pending: pending || 0
       };
     });
   })();
@@ -339,16 +342,29 @@ const DashBoard = () => {
           }
         />
         <PropertyTypesDistribution
-          data={
-            dashboardData?.PropertiesTotal?.map((property:any, index) => ({
-              name:
-                property?.property_type?.charAt(0).toUpperCase() + property?.property_type?.slice(1),
-              value: property?._count,
-              color: ["#06B6D4", "#EC4899", "#EF4444", "#8B5CF6", "#FACC15"][
-                index % 5
-              ],
-            })) || []
-          }
+          data={[
+            ...(dashboardData?.PropertiesTotal?.map(
+              (property: any, index: number) => ({
+                name:
+                  property?.property_type?.charAt(0).toUpperCase() +
+                  property?.property_type?.slice(1),
+                value: property?._count,
+                color: ["#06B6D4", "#EC4899", "#EF4444", "#8B5CF6", "#FACC15"][
+                  index % 5
+                ],
+              })
+            ) || []),
+
+            ...(dashboardData?.LandsTotal?.map(
+              (land: any, index: number) => ({
+                name: land?._id, // "Land"
+                value: land?.count,
+                color: ["#10B981", "#6366F1", "#F97316"][
+                  index % 3
+                ],
+              })
+            ) || []),
+          ]}
         />
       </div>
 

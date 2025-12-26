@@ -6,8 +6,8 @@ const initialState: LandsInitialstate = {
     selectedLand: {
         land_name: "",
         square_feet: "",
-        acre: "",
-        cent: "",
+        // acre: "",
+        // cent: "",
         land_address: "",
         owner_information: {
             full_name: "",

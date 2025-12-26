@@ -99,9 +99,9 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
   const formatDate = (dateString: any) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
+    return date.toLocaleDateString('en-IN', {
       day: 'numeric',
+      month: 'long',
       year: 'numeric'
     });
   };

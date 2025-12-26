@@ -1,10 +1,7 @@
 import React from 'react'
 import { Card, CardContent } from '../ui/card'
-import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import buildingBlue from '../../assets/properties/building-blue.png';
-import buildingGreen from '../../assets/properties/building-green.png';
-import buildingPink from '../../assets/properties/building-pink.png';
 import locationImg from '../../assets/properties/location.png';
 import callImg from '../../assets/properties/call.svg';
 import editImg from '../../assets/properties/edit.png';

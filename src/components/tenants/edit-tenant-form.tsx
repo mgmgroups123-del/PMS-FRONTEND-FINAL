@@ -26,7 +26,7 @@ import {
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk';
-import { GetByIdLandService, GetLandsDetails } from '../../features/lands/service';
+import { GetLandsDetails } from '../../features/lands/service';
 
 interface EditTenantFormProps {
 	isOpen: boolean;
@@ -98,7 +98,7 @@ export default function EditTenantForm({
 				emailAddress: tenantData?.personal_information?.email || '',
 				address: tenantData?.personal_information?.address || '',
 				phoneNumber: tenantData?.personal_information?.phone || '',
-				unit: tenantData?.unitRelation?.id || '', // This should be the unit UUID
+				unit: tenantData?.unitRelation?.id || tenant?.landRelation.id, // This should be the unit UUID
 				propertytype: propertyType,
 				propertyName: propertyId, // Store property ID for Select value
 				tenantType: tenantData?.tenant_type || '',

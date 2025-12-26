@@ -73,6 +73,7 @@ const LandHome = () => {
   const endIndex = startIndex + rowsPerPage;
   const paginatedLands = filteredLands.slice(startIndex, endIndex);
 
+
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
