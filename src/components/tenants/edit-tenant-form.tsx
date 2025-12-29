@@ -252,17 +252,21 @@ export default function EditTenantForm({
 				deposit: parseFloat(formData.securityDeposit) || 0,
 				hasGST: formData.hasGst || false,
 				financial_information: {
-					rent: formData.rent || '',
+					rent: parseFloat(formData.rent) || 0,
 					maintenance: parseFloat(formData.maintanance) || 0,
+					cgst: parseFloat(formData?.cgst) || 0,
+					sgst: parseFloat(formData?.sgst) || 0,
+					tds: parseFloat(formData?.tds) || 0,
+					total: parseFloat(formData?.totalmonthlyrent) || 0
 				}
 			};
 
 			// Add GST fields only for rent tenants with GST enabled
-			if (formData.tenantType === 'rent' && formData.hasGst) {
-				payload.financial_information.cgst = parseFloat(formData.cgst) || 0;
-				payload.financial_information.sgst = parseFloat(formData.sgst) || 0;
-				payload.financial_information.tds = parseFloat(formData.tds) || 0;
-			}
+			// if (formData.tenantType === 'rent' && formData.hasGst) {
+			// 	payload.financial_information.cgst = parseFloat(formData.cgst) || 0;
+			// 	payload.financial_information.sgst = parseFloat(formData.sgst) || 0;
+			// 	payload.financial_information.tds = parseFloat(formData.tds) || 0;
+			// }
 
 			console.log('Update payload:', tenant);
 

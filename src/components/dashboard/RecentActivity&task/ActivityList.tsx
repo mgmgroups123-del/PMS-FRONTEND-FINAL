@@ -54,7 +54,7 @@ export default function ActivityList({
 
               {/* Time */}
               <div className="text-gray-700 text-center">
-                {dayjs(item.createdAt).format("hh:mm A")}
+                {dayjs(item.createdAt).format("DD-MM-YYYY hh:mm A")}
               </div>
 
               {/* Action */}

@@ -59,6 +59,7 @@ interface CombinedRentItem {
   lease_end_date: string;
   address: string;
   tenantEmail: string;
+  phone: string
   currentMonth: {
     uuid: string;
     amount: number;
@@ -69,6 +70,7 @@ interface CombinedRentItem {
     maintenance: number;
     tds: number;
     total: number;
+    TotalRent: number;
   };
   previousMonth: {
     uuid: string;
@@ -80,6 +82,7 @@ interface CombinedRentItem {
     maintenance: number;
     tds: number;
     total: number;
+    TotalRent: number;
   };
 }
 
@@ -129,7 +132,7 @@ const Rent: React.FC = () => {
   // Generate years for filtering (current year and previous 5 years)
   const generateYears = () => {
     const years = [];
-    for (let i = -2; i <= 2; i++) {
+    for (let i = -2; i <= 5; i++) {
       years.push(currentYear + i);
     }
     return years.sort((a, b) => b - a); // Sort descending (newest first)
@@ -141,7 +144,7 @@ const Rent: React.FC = () => {
     const currentDate = new Date();
 
     // Add 12 months including current and previous months
-    for (let i = -2; i <= 9; i++) {
+    for (let i = -2; i <= 12; i++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
       const monthName = date.toLocaleString('default', { month: 'long' });
       const year = date.getFullYear();
@@ -343,7 +346,7 @@ const Rent: React.FC = () => {
     if (selectedRent && isModalOpen) {
       setEditableData({
         full_name: selectedRent?.tenantName || "",
-        rent: selectedRent.currentMonth?.amount || 0,
+        rent: Number(selectedRent.currentMonth?.amount) || 0,
         maintenance: selectedRent?.currentMonth?.maintenance || selectedRent?.previousMonth?.maintenance,
         cgst: selectedRent?.currentMonth?.cgst || selectedRent?.previousMonth?.cgst,
         sgst: selectedRent?.currentMonth?.sgst || selectedRent?.previousMonth?.sgst,
@@ -378,7 +381,7 @@ const Rent: React.FC = () => {
       const data = {
         uuid: selectedRent.tenantId,
         data: {
-          personal_information: { full_name: editableData.full_name },
+          personal_information: { full_name: editableData.full_name, email: selectedRent.tenantEmail, phone: selectedRent?.phone, address: selectedRent?.address },
           financial_information: {
             rent: Number(editableData.rent),
             maintenance: Number(editableData.maintenance),
@@ -781,16 +784,16 @@ const Rent: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    ₹{item.currentMonth?.amount || "0"}
+                    ₹{item.currentMonth?.TotalRent}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
                     <div className="flex flex-col gap-2">
                       {/* Previous Month Due with Status */}
-                      {item?.previousMonth?.amount > 0 ? (
+                      {item?.previousMonth?.TotalRent > 0 ? (
                         <div className="flex items-center justify-between bg-red-50 p-2 rounded border border-red-200">
                           <span className="text-sm text-red-700 font-medium">
-                            ₹{item.previousMonth.amount}
+                            ₹{item.previousMonth.TotalRent}
                           </span>
                           <div className="relative">
                             <div
@@ -1205,7 +1208,7 @@ const Rent: React.FC = () => {
                             placeholder="0"
                           />
                         ) : (
-                          <span className="font-medium">₹{editableData.rent || "0"}</span>
+                          <span className="font-medium">₹{editableData?.rent || "0"}</span>
                         )}
                       </div>
                       <div className="flex justify-between items-center">
