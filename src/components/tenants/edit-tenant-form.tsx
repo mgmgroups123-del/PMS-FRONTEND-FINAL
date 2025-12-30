@@ -379,6 +379,7 @@ export default function EditTenantForm({
 										<Label htmlFor='propertytype'>Property Type</Label>
 										<Select
 											value={formData.propertytype}
+											disabled={true}
 											onValueChange={(value) => {
 												handleInputChange('propertytype', value);
 												setSelectedProperty(value);
@@ -418,10 +419,10 @@ export default function EditTenantForm({
 													unit: ''
 												}));
 											}}
-											disabled={!selectedProperty}
+											disabled={true}
 										>
 											<SelectTrigger className='w-full'>
-												<SelectValue placeholder={selectedProperty ? 'Select Property' : 'Select property type first'} />
+												<SelectValue placeholder={selectedProperty ? 'Select Property' : 'Select property type first'}/>
 											</SelectTrigger>
 											<SelectContent className='bg-white'>
 												{commercial?.map((c: any) => (
@@ -436,6 +437,7 @@ export default function EditTenantForm({
 										<Label htmlFor='tenantType'>Tenant Type</Label>
 										<Select
 											value={formData.tenantType}
+											disabled={true}
 											onValueChange={(value) => {
 												handleInputChange('tenantType', value);
 												// Reset GST-related fields when tenant type changes
@@ -463,10 +465,10 @@ export default function EditTenantForm({
 										<Label htmlFor='unit'>Unit</Label>
 										<Select
 											value={formData.unit}
+											disabled={true}
 											onValueChange={(value) =>
 												handleInputChange('unit', value)
 											}
-											disabled={!selectedPropertyId}
 										>
 											<SelectTrigger className='w-full'>
 												<SelectValue placeholder={selectedPropertyId ? 'Select Unit' : 'Select property first'} />
@@ -494,7 +496,7 @@ export default function EditTenantForm({
 								</CardTitle>
 							</CardHeader>
 							<CardContent className='p-6 space-y-4'>
-								<div className='grid grid-cols-3 gap-4'>
+								<div className='grid grid-cols-2 gap-4'>
 									<div className='space-y-2'>
 										<Label htmlFor='securityDeposit'>Security Deposit</Label>
 										<Input
@@ -511,7 +513,7 @@ export default function EditTenantForm({
 									{formData.tenantType === 'rent' && (
 										<>
 											<div className='space-y-2'>
-												<Label htmlFor='rent'>Monthly Rent *</Label>
+												<Label htmlFor='rent'>Monthly Rent and Maintenance Charge *</Label>
 												<Input
 													id='rent'
 													value={formData.rent}
@@ -522,7 +524,7 @@ export default function EditTenantForm({
 													type='number'
 												/>
 											</div>
-											<div className='space-y-2'>
+											{/* <div className='space-y-2'>
 												<Label htmlFor='maintanance'>Maintenance Charge</Label>
 												<Input
 													id='maintanance'
@@ -533,7 +535,7 @@ export default function EditTenantForm({
 													placeholder='Enter maintenance charge'
 													type='number'
 												/>
-											</div>
+											</div> */}
 										</>
 									)}
 									{formData.tenantType === 'lease' && (

@@ -114,7 +114,7 @@ export default function ViewTenantModal({
 								</div>
 								<div className='space-y-2'>
 									<Label>Address</Label>
-									<div className='p-2 bg-gray-50 rounded border text-sm'>
+									<div className='p-2 bg-gray-50 rounded border text-sm break-words'>
 										{singleTenantData?.personal_information?.address}
 									</div>
 								</div>
@@ -176,9 +176,9 @@ export default function ViewTenantModal({
 									Financial Information
 								</CardTitle>
 							</CardHeader>
-							<CardContent className='p-6 grid grid-cols-2 gap-4'>
+							<CardContent className='p-6 grid  gap-4'>
 								<div className='space-y-2'>
-									<Label>Monthly Rent</Label>
+									<Label>{singleTenantData?.hasGST ? 'Monthly Rent and Maintenance Charge ( included GST )' : 'Monthly Rent and Maintenance Charge'}</Label>
 									<div className='p-2 bg-gray-50 rounded border text-sm'>
 										₹
 										{singleTenantData?.financial_information

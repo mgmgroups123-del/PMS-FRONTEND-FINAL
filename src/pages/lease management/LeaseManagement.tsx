@@ -78,11 +78,11 @@ function LeaseManagement() {
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    const day = String(date.getDate()).padStart(2,"0");
+    const month = date.toLocaleString('default', {month: 'short'});
+    const year = date.getFullYear();
+
+    return `${day} ${month}, ${year}`
   }
 
 
@@ -134,7 +134,7 @@ function LeaseManagement() {
       } else {
         period = `${formatDate(leaseDuration.start_date)} - ${formatDate(leaseDuration.end_date)}`
         const monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
-        duration = monthsDiff >= 12 ? `${Math.floor(monthsDiff / 12)}Yr` : `${monthsDiff}Mth`
+        duration = monthsDiff >= 12 ? `${Math.floor(monthsDiff / 12)} Years` : `${monthsDiff} Months`
       }
     }
 
@@ -348,7 +348,7 @@ function LeaseManagement() {
 
         <Card className="shadow-lg border rounded-2xl overflow-hidden ">
           <CardContent className="pl-3 pr-3 ">
-            <div className="border shadow-md rounded-xl mb-[30px] overflow-hidden ">
+            <div className="border shadow-md rounded-xl mb-[15px] overflow-hidden ">
 
               <div className="overflow-x-auto ">
                 <table className="w-full table-fixed">

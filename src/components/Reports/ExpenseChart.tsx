@@ -30,7 +30,7 @@ const formatIndianCurrency = (num: number) => {
 
 const ExpenseBreakdown: React.FC = () => {
   const ReportsData = useSelector(selectDashboardData);
-  const maintenanceExpenseGraph = ReportsData?.maintenanceExpenseGraph?.[0];
+  const maintenanceExpenseGraph:any = ReportsData?.maintenanceExpenseGraph;
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("Monthly");
@@ -46,7 +46,7 @@ const ExpenseBreakdown: React.FC = () => {
     const monthlyData = maintenanceExpenseGraph?.monthly || [];
     const monthMap: Record<number, number> = {};
     monthlyData.forEach((item: any) => {
-      monthMap[item._id.month] = item.totalMonthlyExpense;
+      monthMap[item?.month] = item.totalMonthlyExpense;
     });
 
     return months.map((m, i) => ({
@@ -64,7 +64,7 @@ const ExpenseBreakdown: React.FC = () => {
     ];
 
     const apiYears = (maintenanceExpenseGraph?.yearly || []).map((item: any) => ({
-      year: item._id.year.toString(),
+      year: item?.year.toString(),
       maintenance: item.totalYearlyExpense,
     }));
 

@@ -201,31 +201,31 @@ const DashBoard = () => {
     });
   })();
 
-  const yearlyRevenueData = (() => {
-    if (
-      !dashboardData?.rentCollectionGraph ||
-      !isValidRentCollectionGraph(dashboardData.rentCollectionGraph)
-    ) {
-      return [];
-    }
+  // const yearlyRevenueData = (() => {
+  //   if (
+  //     !dashboardData?.yearlyRevenueGraph ||
+  //     !isValidRentCollectionGraph(dashboardData.yearlyRevenueGraph)
+  //   ) {
+  //     return [];
+  //   }
 
-    const startYear = 2022;
-    const currentYear = new Date().getFullYear();
+  //   const startYear = 2022;
+  //   const currentYear = new Date().getFullYear();
 
-    const apiYear = currentYear.toString();
-    const yearlyData = dashboardData.rentCollectionGraph.yearly;
+  //   const apiYear = currentYear.toString();
+  //   const yearlyData = dashboardData.rentCollectionGraph.yearly;
 
-    const merged = [];
-    for (let y = startYear; y <= currentYear + 1; y++) {
-      merged.push({
-        year: y.toString(),
-        revenue: y.toString() === apiYear ? yearlyData.rev || 0 : 0,
-        netIncome: y.toString() === apiYear ? yearlyData.exp || 0 : 0,
-      });
-    }
+  //   const merged = [];
+  //   for (let y = startYear; y <= currentYear + 1; y++) {
+  //     merged.push({
+  //       year: y.toString(),
+  //       revenue: y.toString() === apiYear ? yearlyData.rev || 0 : 0,
+  //       netIncome: y.toString() === apiYear ? yearlyData.exp || 0 : 0,
+  //     });
+  //   }
 
-    return merged;
-  })();
+  //   return merged;
+  // })();
 
   const formatPercent = (value: number) => `${Number(value).toFixed(1)}%`;
 
@@ -327,7 +327,7 @@ const DashBoard = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <MonthlyRevenueTrendLine data={monthlyRevenueData} />
-        <MonthlyRevenueTrendBar data={yearlyRevenueData} />
+        <MonthlyRevenueTrendBar data={dashboardData?.yearlyRevenueGraph} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -337,7 +337,8 @@ const DashBoard = () => {
               month: new Date(0, item.month - 1).toLocaleString("default", {
                 month: "short",
               }),
-              rate: item.occupancyRate,
+              rate: Math.ceil(item.occupancyRate),
+              year: item.year
             })) || []
           }
         />

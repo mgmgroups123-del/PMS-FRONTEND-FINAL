@@ -75,7 +75,7 @@ interface DashboardData {
   OverAllRevenue: number;
   totalMonthlyPending: number;
   monthlyRevenueGraph: any[];
-  yearlyRevenueGraph: any[];
+  yearlyRevenueGraph: any;
   occupancyGraph: OccupancyGraph[];
   paymentStatusBreakdownGraph: any[];
   rentCollectionGraph: RentCollectionGraph;   

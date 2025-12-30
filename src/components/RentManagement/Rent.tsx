@@ -149,7 +149,7 @@ const Rent: React.FC = () => {
       const monthName = date.toLocaleString('default', { month: 'long' });
       const year = date.getFullYear();
       months.push({
-        name: `${monthName} ${year}`,
+        name: `${monthName}`,
         value: `${year}-${(date.getMonth() + 1).toString().padStart(2, '0')}`,
         monthIndex: date.getMonth() + 1,
         year: year
@@ -476,12 +476,12 @@ const Rent: React.FC = () => {
     setSearchTerm('');
   };
 
-  const resetFilters = () => {
-    setMonthFilter("all");
-    setYearFilter(currentYear.toString());
-    setStatusFilter("All Status");
-    setSearchTerm("");
-  };
+  // const resetFilters = () => {
+  //   setMonthFilter("all");
+  //   setYearFilter(currentYear.toString());
+  //   setStatusFilter("All Status");
+  //   setSearchTerm("");
+  // };
 
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
@@ -503,6 +503,10 @@ const Rent: React.FC = () => {
         !(badgeRef.current?.contains(target) || dropdownRef.current?.contains(target))) {
         setOpenDropdownId(null);
       }
+
+      if (openPreviousDropdownId && !(badgeRef.current?.contains(target) || dropdownRef.current?.contains(target))) {
+        setOpenPreviousDropdownId(null);
+        }
     };
 
     const handleKey = (e: KeyboardEvent) => {
@@ -511,6 +515,7 @@ const Rent: React.FC = () => {
         setIsYearDropdownOpen(false);
         setIsStatusDropdownOpen(false);
         setOpenDropdownId(null);
+        setOpenPreviousDropdownId(null);
       }
     };
 
@@ -521,7 +526,7 @@ const Rent: React.FC = () => {
       document.removeEventListener("mousedown", handleDocClick);
       document.removeEventListener("keydown", handleKey);
     };
-  }, [isMonthDropdownOpen, isYearDropdownOpen, isStatusDropdownOpen, openDropdownId]);
+  }, [isMonthDropdownOpen, isYearDropdownOpen, isStatusDropdownOpen, openDropdownId, openPreviousDropdownId]);
 
   const role = GetLocalStorage('role');
 
@@ -655,7 +660,7 @@ const Rent: React.FC = () => {
             >
               <span className="text-[#ed3237]">
                 {monthFilter === "all"
-                  ? "All Months"
+                  ? new Date().toLocaleString('default', {month: "long"})
                   : monthsWithYears.find(m => m.value === monthFilter)?.name || "Select Month"
                 }
               </span>
@@ -676,7 +681,7 @@ const Rent: React.FC = () => {
             {isMonthDropdownOpen && (
               <div className="absolute month-dropdown w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2 max-h-80 custom-scrollbar">
                 {monthsWithYears
-                  .filter(month => month.value === "all" || month.year === parseInt(yearFilter))
+                  .filter(month => month.year === parseInt(yearFilter))
                   .map((month) => (
                     <div
                       key={month.value}
@@ -739,12 +744,12 @@ const Rent: React.FC = () => {
           </div>
 
           {/* Reset Filters Button */}
-          <button
+          {/* <button
             onClick={resetFilters}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Reset Filters
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -1113,6 +1118,7 @@ const Rent: React.FC = () => {
                         </label>
                         <Input
                           value={editableData.full_name}
+                          disabled={true}
                           onChange={(e) => handleInputChange('full_name', e.target.value)}
                           className="w-full"
                           placeholder="Enter tenant name"

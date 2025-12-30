@@ -471,11 +471,11 @@ export default function Tenants() {
 									</div>
 
 									<div
-										className={`grid grid-cols-3 gap-3 mb-4`}
+										className={`grid grid-cols-3  gap-3 mb-4`}
 									>
 										{tenant?.tenant_type === 'rent' ? (
 											<>
-												<div className='bg-blue-50 p-3 rounded-lg'>
+												{/* <div className='bg-blue-50 p-3 rounded-lg'>
 													<div className='flex items-center gap-2 mb-1'>
 														<div className='w-5 h-5 bg-blue-100 rounded flex items-center justify-center'>
 															₹
@@ -490,7 +490,7 @@ export default function Tenants() {
 															tenant?.financial_information?.rent
 														).toLocaleString()}
 													</p>
-												</div>
+												</div> */}
 												<div className='bg-purple-50 p-3 rounded-lg relative'>
 													<div className='flex items-center gap-2 mb-1'>
 														<div className='w-5 h-5 bg-purple-100 rounded flex items-center justify-center'>
@@ -516,6 +516,7 @@ export default function Tenants() {
 													<p className='font-bold ml-8 text-lg text-[#c9c61e]'>
 														₹{Number(tenant?.rent).toLocaleString()}
 													</p>
+													{/* <p className='text-[9px] text-gray-600 text-end'>{tenant?.hasGST ? '* included GST' : ""}</p> */}
 												</div>
 												{/* <div className='bg-yellow-50 p-3 rounded-lg relative'>
 													<div className='flex items-center gap-2 mb-1'>
@@ -584,13 +585,13 @@ export default function Tenants() {
 
 										<div className='flex justify-between items-center mb-2'>
 											<p className='text-lg font-bold text-gray-700'>
-												{tenant.lease_duration.start_date? new Date(
+												{tenant.lease_duration.start_date ? new Date(
 													tenant.lease_duration.start_date
 												).toLocaleDateString('en-IN', {
 													month: 'short',
 													day: 'numeric',
 													year: 'numeric',
-												}):'N/A'}{' '}
+												}) : 'N/A'}{' '}
 												-{' '}
 												{tenant?.lease_duration?.end_date ? new Date(
 													tenant?.lease_duration?.end_date

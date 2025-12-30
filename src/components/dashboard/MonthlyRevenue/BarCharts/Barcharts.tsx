@@ -30,6 +30,8 @@ const MonthlyRevenueTrendBar: React.FC<{ data: DataPoint[] }> = ({ data }) => {
   const total =
     data?.reduce((sum, entry) => sum + entry.revenue + entry.netIncome, 0) || 0;
 
+    console.log("Dataa", data)
+
   return (
     <div className="bg-white p-4 rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] w-full flex flex-col">
       {/* Header */}
@@ -48,7 +50,7 @@ const MonthlyRevenueTrendBar: React.FC<{ data: DataPoint[] }> = ({ data }) => {
           <img src={Empty_Report} alt="EmptyImg" className="w-[80px] mb-4" />
           <h1 style={{ ...FONTS.large_card_subHeader }}>Yearly Revenue Growth</h1>
           <p style={{ ...FONTS.large_card_description3, textAlign: "center" }}>
-            Monthly revenue details will appear once available.
+            Yearly revenue details will appear once available.
           </p>
         </div>
       ) : (
@@ -66,11 +68,11 @@ const MonthlyRevenueTrendBar: React.FC<{ data: DataPoint[] }> = ({ data }) => {
               </pattern>
             </defs>
 
-            <XAxis dataKey="year" tick={true} axisLine={false} tickLine={false} />
+            <XAxis dataKey="year" tick={true} axisLine={true} tickLine={true} />
             <YAxis
               tick={true}
-              axisLine={false}
-              tickLine={false}
+              axisLine={true}
+              tickLine={true}
               tickFormatter={formatIndianCurrency}
             />
 

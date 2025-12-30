@@ -11,6 +11,7 @@ import Frame_1 from "../../assets/image 315.png";
 import { useSelector } from "react-redux";
 import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector";
 import { getAllPropertiesReport } from "../../features/Properties/Services";
+import { BsCircleFill } from "react-icons/bs";
 
 const FinancialReport = () => {
   const ReportsData = useSelector(selectDashboardData);
@@ -150,7 +151,7 @@ const FinancialReport = () => {
           </section>
 
           {/* Revenue Chart */}
-          <Card className=" shadow-[0px_0px_15px_0px_#0000001A] border-0 pt-0 rounded-lg">
+          <Card className=" shadow-[0px_0px_15px_0px_#0000001A] border-0 pt-0 rounded-lg mb-5">
             <CardHeader className="flex items-center justify-between pl-0">
               <div className="flex items-center">
                 <img
@@ -222,14 +223,14 @@ const FinancialReport = () => {
                           ? "month"
                           : "year"
                       }
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={true}
+                      tickLine={true}
                       tick={{ fill: "#9ca3af", fontSize: 14 }}
                       dy={10}
                     />
                     <YAxis
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={true}
+                      tickLine={true}
                       tick={{ fill: "#9ca3af", fontSize: 14 }}
                       dx={-10}
                       tickFormatter={(val) => formatIndianNumber(val)}
@@ -243,6 +244,7 @@ const FinancialReport = () => {
                       }}
                       formatter={(val: any) => formatIndianNumber(val)} // ✅ Add ₹ formatting
                     />
+                    
 
                     <Area
                       type="monotone"
@@ -250,7 +252,7 @@ const FinancialReport = () => {
                       stroke="#EF5DA8"
                       strokeWidth={5}
                       fill="transparent"
-                      dot={false}
+                      dot={true}
                       activeDot={{ r: 6, fill: "#EF5DA8" }}
                     />
                     <Area
@@ -259,12 +261,16 @@ const FinancialReport = () => {
                       stroke="#7B00FF"
                       strokeWidth={5}
                       fill="transparent"
-                      dot={false}
+                      dot={true}
                       activeDot={{ r: 6, fill: "#7B00FF" }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              <div className="flex justify-center items-center gap-8">
+                <span className="text-[#EF5DA8] flex gap-2 items-center"><BsCircleFill className="text-[8px]"/>Expense</span>
+                <span className="text-[#7B00FF] flex gap-2 items-center"><BsCircleFill className="text-[8px]"/>Revenue</span>
+              </div>
             </CardContent>
           </Card>
         </div>
