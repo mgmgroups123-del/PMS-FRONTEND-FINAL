@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -13,36 +13,60 @@ import Empty_Report from "../../../assets/Reports/Empty_Report.png";
 import { FONTS } from "../../../constants/ui constants";
 
 interface RentCollectionRateProps {
-  data: { month: string; paid: number; pending: number }[];
+  data: {
+  monthly: {
+    [year: number]: {
+      [month: string]: {
+        exp: number;
+        rev: number;
+        pending: number;
+      };
+    };
+  };
+};
 }
 
+const MONTHS = [
+  "jan","feb","mar","apr","may","jun",
+  "jul","aug","sep","oct","nov","dec"
+];
+
+const MONTH_LABELS: Record<string, string> = {
+  jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr",
+  may: "May", jun: "Jun", jul: "Jul", aug: "Aug",
+  sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
+};
+
 const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const mergedData = months.map((m) => {
-    const found = data?.find((d) => d.month === m);
-    return found || { month: m, paid: 0, pending: 0 };
-  });
-
-  const total = mergedData.reduce(
-    (sum, entry) => sum + entry.paid + entry.pending,
-    0
+  /* ---------------- Available Years ---------------- */
+  const monthly = data?.monthly
+  const years = useMemo(
+    () => Object.keys(monthly).map(Number).sort((a, b) => b - a),
+    [monthly]
   );
 
-  // Format numbers as k, L, Cr
+  const [selectedYear, setSelectedYear] = useState<number>(years[0]);
+
+  /* ---------------- Build Chart Data ---------------- */
+  const chartData = useMemo(() => {
+    if (!monthly[selectedYear]) return [];
+
+    return MONTHS.map((month) => ({
+      month: MONTH_LABELS[month],
+      paid: monthly[selectedYear][month]?.rev ?? 0,
+      pending: monthly[selectedYear][month]?.pending ?? 0,
+    }));
+  }, [monthly, selectedYear]);
+
+  const total = useMemo(
+    () =>
+      chartData.reduce(
+        (sum, item) => sum + item.paid + item.pending,
+        0
+      ),
+    [chartData]
+  );
+
   const formatIndianNumber = (num: number) => {
     if (num >= 10000000) return `${(num / 10000000).toFixed(2)} Cr`;
     if (num >= 100000) return `${(num / 100000).toFixed(2)} L`;
@@ -53,16 +77,31 @@ const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
   return (
     <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-6 flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#289A9A26]/15 shadow-lg">
-          <div className="text-[#289A9A]">
-            <Building2 />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#289A9A26]/15 shadow-lg">
+            <Building2 className="text-[#289A9A]" />
           </div>
+          <h2 className="font-semibold text-lg">Rent Collection Rate</h2>
         </div>
-        <h2 className="font-semibold text-lg">Rent Collection Rate</h2>
+
+        {/* Year Filter */}
+        {years.length > 1 && (
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="border rounded-lg px-3 py-1 text-sm cursor-pointer"
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* Chart or No Data */}
+      {/* Chart / Empty */}
       {total === 0 ? (
         <div className="flex flex-col justify-center items-center flex-1 py-10">
           <img src={Empty_Report} alt="EmptyImg" className="w-[80px] mb-4" />
@@ -73,14 +112,14 @@ const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={mergedData} barSize={30}>
+          <BarChart data={chartData} barSize={30}>
             <XAxis dataKey="month" axisLine={false} tickLine={false} />
             <YAxis
               axisLine={false}
               tickLine={false}
               tickFormatter={formatIndianNumber}
             />
-            <Tooltip formatter={(value: number) => formatIndianNumber(value)} />
+            <Tooltip formatter={(v: number) => formatIndianNumber(v)} />
             <Legend />
             <Bar
               dataKey="pending"

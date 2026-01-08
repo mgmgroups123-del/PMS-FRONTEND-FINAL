@@ -40,12 +40,13 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
   const tenantTypes = ["All Types", "rent", "lease"];
 
   const fetchTenants = async () => {
-    await dispatch(getAllTenantData(""));
+    const data = {page: currentPage, limit: rowsPerPage}
+    await dispatch(getAllTenantData(data));
   };
 
   useEffect(() => {
     fetchTenants();
-  }, [dispatch]);
+  }, [dispatch, rowsPerPage, currentPage]);
 
   // Filter tenants by year + month + type + search
   const filteredTenants = tenants.filter((tenant: any) => {
@@ -76,17 +77,17 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
   });
 
   // Pagination logic
-  const totalItems = filteredTenants.length;
+  const totalItems = data?.totalRecords;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const paginatedTenants = filteredTenants.slice(startIndex, endIndex);
+  // const paginatedTenants = filteredTenants.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+  const handleRowsPerPageChange = async (newRowsPerPage: number) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
   };
@@ -276,8 +277,8 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
             </div>
 
             {/* Table Rows */}
-            {paginatedTenants.length ? (
-              paginatedTenants.map((tenant: any, index: number) => (
+            {filteredTenants.length ? (
+              filteredTenants.map((tenant: any, index: number) => (
                 <div
                   key={tenant.uuid || index}
                   className="shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-6 gap-4 items-center"
@@ -294,7 +295,7 @@ const TenantReport: React.FC<props> = ({ selectedType, setSelectedType }) => {
                     {tenant.tenant_type}
                   </p>
                   <div style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D] grid">
-                    <span>{formatDate(tenant.lease_duration.start_date)}</span>
+                    <span>{formatDate(tenant.lease_duration.start_date)} -</span> 
                     <span>{formatDate(tenant.lease_duration.end_date)}</span>
                   </div>
                   <p style={{ ...FONTS.Table_Body_2 }} className="text-[#7D7D7D]">

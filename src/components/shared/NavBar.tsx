@@ -116,6 +116,26 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }: any) {
   }, [dispatch]);
 
 
+  const hasAnyResults = results &&
+    Object.values(results).some((arr: any) => arr.length > 0);
+
+  const getDisplayName = (item: any) => {
+    if (item?.personal_information) {
+      try {
+        const info =
+          typeof item.personal_information === "string"
+            ? JSON.parse(item.personal_information)
+            : item.personal_information;
+
+        return info?.full_name || "";
+      } catch {
+        return "";
+      }
+    }
+
+    return item?.property_name || item?.land_name || "";
+  };
+
 
   return (
     <div className="flex w-full gap-5">
@@ -139,30 +159,42 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }: any) {
           <FiSearch className="absolute left-3 top-[25px] -translate-y-1/2 h-4 w-4 text-black" />
           <Input
             type="text"
-            placeholder="Search or type"
+            placeholder="Search Tenants, Properties and Lands"
             onChange={handleSearch}
             className="w-full pl-9 pr-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
           />
-          {results && (
+          {hasAnyResults && (
             <div className="absolute mt-2 w-full bg-white shadow-lg rounded max-h-60 overflow-y-auto z-50">
               {Object.entries(results).map(([key, items]: any) =>
-                items.length > 0 && (
-                  <div key={key} className="p-2 border-b">
-                    <p className="text-gray-500 font-semibold capitalize">{key}</p>
+                items.length > 0 ? (
+                  <div key={key} className="p-2 border-b last:border-b-0">
+                    <p className="text-gray-500 font-semibold capitalize mb-1">
+                      {key}
+                    </p>
+
                     {items.map((item: any) => (
                       <div
-                        key={item._id}
-                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleSelect(key, item._id)}
+                        key={item.id}
+                        className="px-2 py-1 hover:bg-gray-100 cursor-pointer rounded"
+                        onClick={() => handleSelect(key, item.id)}
                       >
-                        {item?.personal_information?.full_name || item?.property_name || item?.land_name}
+                        {getDisplayName(item)}
                       </div>
                     ))}
                   </div>
-                )
+                ) : null
               )}
             </div>
           )}
+
+          {/* Optional global empty message */}
+          {results &&
+            Object.values(results).every((arr: any) => arr.length === 0) && (
+              <div className="absolute mt-2 w-full bg-white shadow-lg rounded p-4 text-center text-gray-500 z-50">
+                No results found
+              </div>
+            )}
+
         </div>
 
         {/* Notification + Profile */}

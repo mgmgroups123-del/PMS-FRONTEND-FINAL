@@ -149,57 +149,57 @@ const DashBoard = () => {
     }));
   })();
 
-  const isValidRentCollectionGraph = (
-    graph: any
-  ): graph is RentCollectionGraph => {
-    return (
-      graph &&
-      typeof graph === "object" &&
-      graph.monthly &&
-      typeof graph.monthly === "object" &&
-      graph.yearly &&
-      typeof graph.yearly === "object"
-    );
-  };
+  // const isValidRentCollectionGraph = (
+  //   graph: any
+  // ): graph is RentCollectionGraph => {
+  //   return (
+  //     graph &&
+  //     typeof graph === "object" &&
+  //     graph.monthly &&
+  //     typeof graph.monthly === "object" &&
+  //     graph.yearly &&
+  //     typeof graph.yearly === "object"
+  //   );
+  // };
 
-  const rentCollectionData = (() => {
-    if (
-      !dashboardData?.rentCollectionGraph ||
-      !isValidRentCollectionGraph(dashboardData.rentCollectionGraph)
-    ) {
-      return [];
-    }
+  // const rentCollectionData = (() => {
+  //   if (
+  //     !dashboardData?.rentCollectionGraph ||
+  //     !isValidRentCollectionGraph(dashboardData.rentCollectionGraph)
+  //   ) {
+  //     return [];
+  //   }
 
-    const monthlyData = dashboardData?.rentCollectionGraph.monthly;
-    return Object.entries(monthlyData).map(([monthKey, values]) => {
-      const { rev, pending } = values as { exp: number; rev: number, pending: number };
-      const monthName = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
-      const paid = rev || 0;
-      // const totalExpected = exp || 0;
-      return { month: monthName, paid, pending };
-    });
-  })();
+  //   const monthlyData = dashboardData?.rentCollectionGraph.monthly;
+  //   return Object.entries(monthlyData).map(([monthKey, values]) => {
+  //     const { rev, pending } = values as { exp: number; rev: number, pending: number };
+  //     const monthName = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
+  //     const paid = rev || 0;
+  //     // const totalExpected = exp || 0;
+  //     return { month: monthName, paid, pending };
+  //   });
+  // })();
 
-  const monthlyRevenueData = (() => {
-    if (
-      !dashboardData?.rentCollectionGraph ||
-      !isValidRentCollectionGraph(dashboardData.rentCollectionGraph)
-    ) {
-      return [];
-    }
+  // const monthlyRevenueData = (() => {
+  //   if (
+  //     !dashboardData?.rentCollectionGraph ||
+  //     !isValidRentCollectionGraph(dashboardData.rentCollectionGraph)
+  //   ) {
+  //     return [];
+  //   }
 
-    const monthlyData = dashboardData.rentCollectionGraph.monthly;
-    return Object.entries(monthlyData).map(([monthKey, values]) => {
-      const { exp, rev, pending } = values as { exp: number; rev: number, pending: number };
-      return {
-        month: monthKey.charAt(0).toUpperCase() + monthKey.slice(1),
-        year: new Date().getFullYear(),
-        revenue: rev || 0,
-        expenses: exp || 0,
-        pending: pending || 0
-      };
-    });
-  })();
+  //   const monthlyData = dashboardData.rentCollectionGraph.monthly;
+  //   return Object.entries(monthlyData).map(([monthKey, values]) => {
+  //     const { exp, rev, pending } = values as { exp: number; rev: number, pending: number };
+  //     return {
+  //       month: monthKey.charAt(0).toUpperCase() + monthKey.slice(1),
+  //       year: new Date().getFullYear(),
+  //       revenue: rev || 0,
+  //       expenses: exp || 0,
+  //       pending: pending || 0
+  //     };
+  //   });
+  // })();
 
   // const yearlyRevenueData = (() => {
   //   if (
@@ -326,21 +326,14 @@ const DashBoard = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <MonthlyRevenueTrendLine data={monthlyRevenueData} />
+        {dashboardData?.rentCollectionGraph && (<MonthlyRevenueTrendLine data={dashboardData?.monthlyRevenueGraph } />)}
+        
         <MonthlyRevenueTrendBar data={dashboardData?.yearlyRevenueGraph} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <OccupancyRateTrend
-          data={
-            processedOccupancyGraph.map((item) => ({
-              month: new Date(0, item.month - 1).toLocaleString("default", {
-                month: "short",
-              }),
-              rate: Math.ceil(item.occupancyRate),
-              year: item.year
-            })) || []
-          }
+          data={ dashboardData?.occupancyGraph}
         />
         <PropertyTypesDistribution
           data={[
@@ -371,7 +364,9 @@ const DashBoard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <RadialChart data={mergedPaymentStatus} />
-        <RentCollectionRate data={rentCollectionData} />
+        {dashboardData?.rentCollectionGraph && (
+          <RentCollectionRate data={dashboardData.rentCollectionGraph} />
+        )}
       </div>
 
       {/* Activity Tabs */}
